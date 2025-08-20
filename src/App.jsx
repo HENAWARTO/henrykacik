@@ -71,6 +71,7 @@ const PROJECTS = [
 
 const LINKS = { email: "hchkacik@gmail.com", phone: "+1 (970) 531-3977", location: "Brooklyn, NY", resumePdf: "/henry-kacik-resume.pdf" };
 
+
 const injectFonts = () => {
   const haveFraunces = document.querySelector('link[data-font="fraunces"]');
   const haveInter = document.querySelector('link[data-font="inter"]');
@@ -180,12 +181,9 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const [phase] = useState(prefersReduced ? 'fallback' : 'particles');
 
-  useEffect(() => {
-    const preload = (u) => { const img = new Image(); img.decoding='async'; img.loading='eager'; img.src=u; };
-    preload(hero);
-    const nextIdx = (heroIdx + 1) % heroFrames.length;
-    if (heroFrames[nextIdx]) preload(heroFrames[nextIdx].src);
-  }, [hero, heroIdx, heroFrames]);
+  useEffect(() => { const preload = (u) => { const img = new Image(); img.decoding='async'; img.loading='eager'; img.src=u; }; preload(hero); const nextIdx = (heroIdx + 1) % heroFrames.length; if (heroFrames[nextIdx]) preload(heroFrames[nextIdx].src); }, [hero, heroIdx, heroFrames]);
+
+  useEffect(() => { if (!hero) return; const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image'; link.href = hero; document.head.appendChild(link); return () => { try { document.head.removeChild(link); } catch(e){} }; }, [hero]);
 
   useEffect(() => {
     if (prefersReduced) return;
@@ -345,9 +343,9 @@ const ParticleHero = ({ imageUrl }) => {
     loader.setCrossOrigin('anonymous');
     loader.load(
       imageUrl,
-      (tex) => { tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = 4; uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); renderer.render(scene, camera); },
+      (tex) => { tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); renderer.render(scene, camera); },
       undefined,
-      () => { loader.load(PLACEHOLDER_HERO, (tex)=>{ uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); }); }
+      () => { loader.load(PLACEHOLDER_HERO, (tex)=>{ tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); }); }
     );
 
     const onResize = () => { const w = container.clientWidth, h = container.clientHeight; renderer.setSize(w, h, true); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); uniforms.u_res.value.set(w, h); };
@@ -375,7 +373,7 @@ const ProjectCard = ({ project }) => {
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
       <div className="md:col-span-8 h-[70vh] overflow-hidden group relative">
         {visible && (
-          <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async"/>
+          <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 1024px) 66vw, 100vw"/>
         )}
         <button onClick={open} className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition">Open Gallery</button>
       </div>
@@ -394,8 +392,12 @@ const Portfolio = () => {
   const next = useCallback(() => setIdx(i => (i+1) % (active?.photos?.length || 1)), [active]);
   const prev = useCallback(() => setIdx(i => (i-1 + (active?.photos?.length || 1)) % (active?.photos?.length || 1)), [active]);
   const close = useCallback(() => setActive(null), []);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const currentSrc = active?.photos ? active.photos[idx] : null;
   useEffect(()=>{ const onKey = (e)=>{ if(!active) return; if(e.key==='Escape') close(); if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); }; const onOpen = (e) => { if(e.detail){ setActive(e.detail); setIdx(0);} }; window.addEventListener('keydown', onKey); window.addEventListener('openGallery', onOpen); return ()=>{ window.removeEventListener('keydown', onKey); window.removeEventListener('openGallery', onOpen); }; },[active, close, next, prev]);
   useEffect(() => { let id = null; try { id = sessionStorage.getItem('openGalleryId'); } catch(e){} if (id) { const p = PROJECTS.find(p=>p.id===id); if (p) { setActive(p); setIdx(0); } try { sessionStorage.removeItem('openGalleryId'); } catch(e){} } }, []);
+  useEffect(() => { setImgLoaded(false); }, [idx, active]);
+  useEffect(() => { if (!active || !active.photos || active.photos.length < 2) return; const N = active.photos.length; const prevIdx = (idx - 1 + N) % N; const nextIdx = (idx + 1) % N; [active.photos[prevIdx], active.photos[nextIdx]].forEach((u)=>{ if(!u) return; const im = new Image(); im.decoding='async'; im.loading='eager'; im.src=u; }); }, [active, idx]);
   return (
     <section className="w-full">
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
@@ -414,8 +416,19 @@ const Portfolio = () => {
                   <button onClick={close} className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
                 </div>
               </div>
-              <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
-                <img src={active.photos[idx]} alt={`${active.title} ${idx+1}`} className="aspect-video w-full object-cover" loading="eager" decoding="async"/>
+              <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
+                {!imgLoaded && (
+                  <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
+                )}
+                <img
+                  src={currentSrc}
+                  alt={`${active.title} ${idx+1}`}
+                  className={`aspect-video w-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  loading="eager"
+                  decoding="async"
+                  fetchpriority="high"
+                  onLoad={() => setImgLoaded(true)}
+                />
               </motion.div>
               <LightboxDetails active={active} idx={idx} />
               <div className="mt-3 flex items-center justify-between text-white/80">
@@ -435,7 +448,7 @@ const About = ({ onNavigate }) => (
     <SectionTitle>About</SectionTitle>
     <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-8 items-center">
       <div className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <img src={ABOUT.photo} alt="Henry Kacik" className="w-full h-full object-cover" loading="lazy"/>
+        <img src={ABOUT.photo}$1loading="lazy" decoding="async" fetchpriority="low"/>
       </div>
       <div className="md:col-span-7">
         <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>{ABOUT.headline}</h3>
@@ -521,4 +534,3 @@ export default function HenryKacikSite() {
     </div>
   );
 }
-
