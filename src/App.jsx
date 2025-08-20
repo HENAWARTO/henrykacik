@@ -158,7 +158,7 @@ const LightboxDetails = ({ active, idx }) => {
 const Nav = ({ route, onNav, lxMode, setLxMode }) => {
   const items = ["home","about","portfolio","resume","contact"];
   return (
-    <nav className="fixed top-0 left-0 z-50 flex w-full justify-between px-6 py-4">
+    <nav className="fixed top-0 left-0 z-50 flex w-full justify-between pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
       <span className="text-2xl text-white mix-blend-difference" style={{ fontFamily: 'Fraunces, serif' }}>Henry Kacik</span>
       <div className="flex gap-4">
         {items.map(it => (<button key={it} onClick={()=>onNav(it)} className={`uppercase tracking-widest text-sm ${route===it?"underline":''} text-white mix-blend-difference`}>{it}</button>))}
@@ -192,7 +192,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   }, [paused, heroFrames.length, prefersReduced]);
 
   return (
-    <section className="relative h-screen overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
+    <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
       {phase === 'fallback' && (
         <>
           <style>{`@keyframes kenburnsA { 0%{transform:scale(1) translate3d(0,0,0)} 100%{transform:scale(1.08) translate3d(2%, -2%, 0)} } @keyframes kenburnsB { 0%{transform:scale(1.05) translate3d(0,0,0)} 100%{transform:scale(1.1) translate3d(-2%, 2%, 0)} }`}</style>
@@ -352,14 +352,19 @@ const ParticleHero = ({ imageUrl }) => {
     onResize();
     window.addEventListener('resize', onResize);
 
-    const onMove = (e) => { const rect = container.getBoundingClientRect(); const x = (e.clientX - rect.left) / rect.width; const y = 1.0 - (e.clientY - rect.top) / rect.height; uniforms.u_mouse.value.set(x, y); mouseRef.current.target = Math.min(1, mouseRef.current.target + 0.08); };
-    window.addEventListener('mousemove', onMove);
+    const onPointer = (e) => { const rect = container.getBoundingClientRect(); const x = (e.clientX - rect.left) / rect.width; const y = 1.0 - (e.clientY - rect.top) / rect.height; uniforms.u_mouse.value.set(x, y); mouseRef.current.target = Math.min(1, mouseRef.current.target + 0.08); };
+    const onLeave = () => { mouseRef.current.target = 0; };
+    renderer.domElement.addEventListener('pointermove', onPointer, { passive: true });
+    renderer.domElement.addEventListener('pointerdown', onPointer, { passive: true });
+    renderer.domElement.addEventListener('pointerleave', onLeave, { passive: true });
 
     const start = performance.now();
     const tick = () => { uniforms.u_time.value = (performance.now() - start) / 1000; const DECAY = 0.97, RISE = 0.985; mouseRef.current.target = Math.max(0, mouseRef.current.target * DECAY); const b = mouseRef.current.brush, tgt = mouseRef.current.target; mouseRef.current.brush = b < tgt ? tgt - (tgt - b) * RISE : tgt + (b - tgt) * DECAY; uniforms.u_brush.value = mouseRef.current.brush; renderer.render(scene, camera); animRef.current = requestAnimationFrame(tick); };
     tick();
 
-    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); window.removeEventListener('resize', onResize); window.removeEventListener('mousemove', onMove); if (rendererRef.current) { rendererRef.current.dispose(); container.removeChild(rendererRef.current.domElement); rendererRef.current = null; } mat.dispose(); (uniforms.u_tex.value)?.dispose?.(); };
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); window.removeEventListener('resize', onResize); renderer.domElement.removeEventListener('pointermove', onPointer);
+    renderer.domElement.removeEventListener('pointerdown', onPointer);
+    renderer.domElement.removeEventListener('pointerleave', onLeave); if (rendererRef.current) { rendererRef.current.dispose(); container.removeChild(rendererRef.current.domElement); rendererRef.current = null; } mat.dispose(); (uniforms.u_tex.value)?.dispose?.(); };
   }, [imageUrl]);
 
   return <div ref={containerRef} className="absolute inset-0" />;
@@ -398,6 +403,9 @@ const Portfolio = () => {
   useEffect(() => { let id = null; try { id = sessionStorage.getItem('openGalleryId'); } catch(e){} if (id) { const p = PROJECTS.find(p=>p.id===id); if (p) { setActive(p); setIdx(0); } try { sessionStorage.removeItem('openGalleryId'); } catch(e){} } }, []);
   useEffect(() => { setImgLoaded(false); }, [idx, active]);
   useEffect(() => { if (!active || !active.photos || active.photos.length < 2) return; const N = active.photos.length; const prevIdx = (idx - 1 + N) % N; const nextIdx = (idx + 1) % N; [active.photos[prevIdx], active.photos[nextIdx]].forEach((u)=>{ if(!u) return; const im = new Image(); im.decoding='async'; im.loading='eager'; im.src=u; }); }, [active, idx]);
+  const touch = useRef({x:0, y:0, active:false});
+  const onTouchStart = (e) => { if (!e.touches?.[0]) return; touch.current = { x:e.touches[0].clientX, y:e.touches[0].clientY, active:true }; };
+  const onTouchEnd = (e) => { if (!touch.current.active) return; const dx = (e.changedTouches?.[0]?.clientX ?? touch.current.x) - touch.current.x; if (Math.abs(dx) > 40) (dx < 0 ? next() : prev()); touch.current.active = false; };
   return (
     <section className="w-full">
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
@@ -416,7 +424,7 @@ const Portfolio = () => {
                   <button onClick={close} className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
                 </div>
               </div>
-              <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
+              <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
                 {!imgLoaded && (
                   <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
                 )}
@@ -448,7 +456,7 @@ const About = ({ onNavigate }) => (
     <SectionTitle>About</SectionTitle>
     <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-8 items-center">
       <div className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <img src={ABOUT.photo}$1loading="lazy" decoding="async" fetchpriority="low"/>
+        <img src={ABOUT.photo} loading="lazy" decoding="async" fetchpriority="low"/>
       </div>
       <div className="md:col-span-7">
         <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>{ABOUT.headline}</h3>
@@ -482,7 +490,7 @@ const Contact = () => (
 );
 
 const Footer = () => (
-  <footer className="py-12 px-6 text-sm text-white bg-black">© {new Date().getFullYear()} Henry Kacik — probably running on too much coffee.</footer>
+  <footer className="py-12 px-6 pb-[max(3rem,env(safe-area-inset-bottom))] text-sm text-white bg-black">© {new Date().getFullYear()} Henry Kacik — probably running on too much coffee.</footer>
 );
 
 export default function HenryKacikSite() {
