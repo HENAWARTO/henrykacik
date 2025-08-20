@@ -55,7 +55,7 @@ const PROJECTS = [
     "Production Supervisor: Blake Berggren",
     "Dramaturg: David Estabrooks & Seramay Schultz"
   ]
- }
+ },
   { id: "antony-cleopatra-2024", title: "Antony & Cleopatra", role: "Lighting Designer", year: "2024", hero: PLACEHOLDER_HERO, blurb: "Epic politics and intimacy in contrast. Update later.", photos: ["/images/antony-cleopatra-1.jpg","/images/antony-cleopatra-2.jpg"], captions: ["Hero image","Battle sequence"], credits: ["By: Shakespeare","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
   { id: "hookman-2023", title: "Hookman", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Horror beats with playful shadows. Update later.", photos: ["/images/hookman-1.jpg","/images/hookman-2.jpg"], captions: ["Hero image","Climax"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
   { id: "evvy-awards-2023", title: "The 42nd Annual Evvy Awards", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Live broadcast polish and musical variety. Update later.", photos: ["/images/evvys-1.jpg","/images/evvys-2.jpg"], captions: ["Hero image","Musical number"], credits: ["Executive Producer: Name","Director: Name","Scenic Design: Name","Video: Name","Audio: Name","Stage Manager: Name"] },
