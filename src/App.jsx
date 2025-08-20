@@ -11,31 +11,41 @@ const ABOUT = {
   bio: `I'm a Brooklyn-based lighting designer for theatre, concerts, and events, and a proud Emerson College alum. I fell in love with lighting design thanks to my brother, who first showed me how light could tell a story just as powerfully as words or music. Ten years later, I’m still chasing that magic. I approach every project with curiosity, creativity, and a storyteller’s eye, shaping light to set the mood, guide the audience, and make moments unforgettable.`,
 };
 
-const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\\//,'')}`;
+const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
+
 const PROJECTS = [
-  { id: "great-comet-2024", 
-   title: "Natasha, Pierre, and the Great Comet of 1812", 
-   role: "Lighting Designer", 
-   year: "2024", 
-   hero: pub("greatcomet/comet10.jpg"), 
-   blurb: "Natasha, Pierre & The Great Comet of 1812 is an electrifying, immersive musical that blends Tolstoy’s War and Peace with a genre-defying score. Our design team channeled this mismatch into the design, resulting in a beautiful production.", 
-   photos: [    pub("greatcomet/comet1.jpg"),
+ {
+  id: "great-comet-2024",
+  title: "Natasha, Pierre, and the Great Comet of 1812",
+  role: "Lighting Designer",
+  year: "2024",
+  hero: pub("greatcomet/comet10.jpg"),
+  blurb: "Natasha, Pierre & The Great Comet of 1812 is an electrifying, immersive musical that blends Tolstoy’s War and Peace with a genre-defying score. Our design team channeled this mismatch into the design, resulting in a beautiful production.",
+  photos: [
+    pub("greatcomet/comet1.jpg"),
     pub("greatcomet/comet2.jpg"),
     pub("greatcomet/comet3.jpg")
-            ],
-   captions: ["Pierre- Our protagonist is introduced. The lighting highlights the inner turmoil the song expresses.","Natasha and her future sister-in-law size one another up. The lights highlight their personality contrast.","The Dream Ballet the is The Opera launches the stage into a chaotic change."], 
-   credits: ["By: Dave Malloy","Directed by: Bevin O'Gara","Scenic Design: Baron E. Pugh","Costume Design: Chloe Moore","Sound Design: Elizabeth Cahill","Hair and Makeup Design: Livvy Waszak","Props Lead: Mariel Richardson","Choreography: Christopher Shin","Music Direction: Sariva Goetz","Stage Manager: Emma Alvarez-Roth","Production Supervisor: Blake Berggren","Dramaturg: David Estabrooks & Seramay Schultz"] },
-  
-  { id: "antony-cleopatra-2024", title: "Antony & Cleopatra", role: "Lighting Designer", year: "2024", hero: PLACEHOLDER_HERO, blurb: "Epic politics and intimacy in contrast. Update later.", photos: ["/images/antony-cleopatra-1.jpg","/images/antony-cleopatra-2.jpg"], captions: ["Hero image","Battle sequence"], credits: ["By: Shakespeare","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "hookman-2023", title: "Hookman", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Horror beats with playful shadows. Update later.", photos: ["/images/hookman-1.jpg","/images/hookman-2.jpg"], captions: ["Hero image","Climax"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "evvy-awards-2023", title: "The 42nd Annual Evvy Awards", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Live broadcast polish and musical variety. Update later.", photos: ["/images/evvys-1.jpg","/images/evvys-2.jpg"], captions: ["Hero image","Musical number"], credits: ["Executive Producer: Name","Director: Name","Scenic Design: Name","Video: Name","Audio: Name","Stage Manager: Name"] },
-  { id: "are-you-someone-2022", title: "Are You Someone to Somebody", role: "Lighting Designer", year: "2022", hero: PLACEHOLDER_HERO, blurb: "Chamber piece with delicate color. Update later.", photos: ["/images/ays-1.jpg","/images/ays-2.jpg"], captions: ["Hero image","Intimate scene"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Stage Manager: Name"] },
-  { id: "one-direction-macbeth-2022", title: "The One Direction Macbeth Musical", role: "Lighting Designer", year: "2022", hero: PLACEHOLDER_HERO, blurb: "Pop satire meets tragedy; bold color story. Update later.", photos: ["/images/odm-1.jpg","/images/odm-2.jpg"], captions: ["Hero image","Concert look"], credits: ["Book: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "humble-boy-2021", title: "Humble Boy", role: "Lighting Designer", year: "2021", hero: PLACEHOLDER_HERO, blurb: "Garden light and family ghosts. Update later.", photos: ["/images/humble-boy-1.jpg","/images/humble-boy-2.jpg"], captions: ["Hero image","Garden dusk"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Stage Manager: Name"] },
-  { id: "addams-family-2019", title: "The Addams Family", role: "Lighting Designer", year: "2019", hero: PLACEHOLDER_HERO, blurb: "Macabre fun with crisp musical looks. Update later.", photos: ["/images/addams-1.jpg","/images/addams-2.jpg"], captions: ["Hero image","Dinner scene"], credits: ["Book: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "joseph-dreamcoat-2019", title: "Joseph and the Amazing Technicolor Dreamcoat", role: "Lighting & Scenic Designer", year: "2019", hero: PLACEHOLDER_HERO, blurb: "Color-forward design and playful spectacle. Update later.", photos: ["/images/joseph-1.jpg","/images/joseph-2.jpg"], captions: ["Hero image","Go-Go-Go Joseph"], credits: ["By: Lloyd Webber & Rice","Directed by: Name","Scenic Design: Henry Kacik","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "fiddler-2018", title: "Fiddler on the Roof", role: "Lighting Designer", year: "2018", hero: PLACEHOLDER_HERO, blurb: "Warmth and tradition with texture. Update later.", photos: ["/images/fiddler-1.jpg","/images/fiddler-2.jpg"], captions: ["Hero image","Sunrise, Sunset"], credits: ["By: Bock & Harnick","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "rock-of-ages-2018", title: "Rock of Ages", role: "Lighting Designer", year: "2018", hero: PLACEHOLDER_HERO, blurb: "Arena-glam riffs and haze; big looks. Update later.", photos: ["/images/roa-1.jpg","/images/roa-2.jpg"], captions: ["Hero image","Finale"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] }
+  ],
+  captions: [
+    "Pierre- Our protagonist is introduced. The lighting highlights the inner turmoil the song expresses.",
+    "Natasha and her future sister-in-law size one another up. The lights highlight their personality contrast.",
+    "The Dream Ballet that is The Opera launches the stage into a chaotic change."
+  ],
+  credits: [
+    "By: Dave Malloy",
+    "Directed by: Bevin O'Gara",
+    "Scenic Design: Baron E. Pugh",
+    "Costume Design: Chloe Moore",
+    "Sound Design: Elizabeth Cahill",
+    "Hair and Makeup Design: Livvy Waszak",
+    "Props Lead: Mariel Richardson",
+    "Choreography: Christopher Shin",
+    "Music Direction: Sariva Goetz",
+    "Stage Manager: Emma Alvarez-Roth",
+    "Production Supervisor: Blake Berggren",
+    "Dramaturg: David Estabrooks & Seramay Schultz"
+  ]
+ }
 ];
 
 const LINKS = { email: "hchkacik@gmail.com", phone: "+1 (970) 531-3977", location: "Brooklyn, NY", resumePdf: "/henry-kacik-resume.pdf" };
