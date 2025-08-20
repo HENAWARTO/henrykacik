@@ -4,16 +4,14 @@ import './index.css'
 import App from './App.jsx'
 
 function mount() {
-  const rootEl = document.getElementById('root')
-  if (!rootEl) return // nothing to mount into (prevents crash)
-  const root = createRoot(rootEl)
-  root.render(
+  const el = document.getElementById('root')
+  if (!el) return
+  createRoot(el).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>
   )
 }
-
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', mount, { once: true })
 } else {
