@@ -376,9 +376,9 @@ const ProjectCard = ({ project }) => {
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
-      <div className="md:col-span-8 h-[70vh] overflow-hidden group relative">
+      <div className="md:col-span-8 aspect-[16/9] md:aspect-auto md:h-[70svh] overflow-hidden group relative bg-black">
         {visible && (
-          <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 1024px) 66vw, 100vw"/>
+          <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-contain md:object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 1024px) 66vw, 100vw"/>
         )}
         <button onClick={open} className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition">Open Gallery</button>
       </div>
@@ -424,14 +424,14 @@ const Portfolio = () => {
                   <button onClick={close} className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
                 </div>
               </div>
-              <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
+              <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative grid place-items-center bg-black" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
                 {!imgLoaded && (
                   <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
                 )}
                 <img
                   src={currentSrc}
                   alt={`${active.title} ${idx+1}`}
-                  className={`aspect-video w-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  className={`w-full h-auto max-h-[80svh] object-contain transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`
                   loading="eager"
                   decoding="async"
                   fetchpriority="high"
@@ -456,7 +456,7 @@ const About = ({ onNavigate }) => (
     <SectionTitle>About</SectionTitle>
     <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-8 items-center">
       <div className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <img src={ABOUT.photo} loading="lazy" decoding="async" fetchpriority="low"/>
+        <img src={ABOUT.photo} className="w-full h-auto block" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 768px) 40vw, 90vw"/>
       </div>
       <div className="md:col-span-7">
         <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>{ABOUT.headline}</h3>
