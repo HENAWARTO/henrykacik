@@ -12,7 +12,15 @@ const ABOUT = {
 };
 
 const PROJECTS = [
-  { id: "great-comet-2024", title: "Natasha, Pierre, and the Great Comet of 1812", role: "Lighting Designer", year: "2024", hero: "comet10.jpg", blurb: "Immersive, musical chaos rendered in light. Update with specifics later.", photos: ["comet1.jpg","comet2.jpg","comet3.jpg"], captions: ["Hero image","Act I moment","Act II finale"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
+  { id: "great-comet-2024", 
+   title: "Natasha, Pierre, and the Great Comet of 1812", 
+   role: "Lighting Designer", 
+   year: "2024", hero: "/henrykacik/public/greatcomet/comet10.jpg", 
+   blurb: "Natasha, Pierre & The Great Comet of 1812 is an electrifying, immersive musical that blends Tolstoy’s War and Peace with a genre-defying score. Our design team channeled this mismatch into the design, resulting in a beautiful production.", 
+   photos: ["/henrykacik/public/greatcomet/comet1.jpg","/henrykacik/public/greatcomet/comet2.jpg","/henrykacik/public/greatcomet/comet3.jpg"], 
+   captions: ["Pierre- Our protagonist is introduced. The lighting highlights the inner turmoil the song expresses.","Natasha and her future sister-in-law size one another up. The lights highlight their personality contrast.","The Dream Ballet the is The Opera launches the stage into a chaotic change."], 
+   credits: ["By: Dave Malloy","Directed by: Bevin O'Gara","Scenic Design: Baron E. Pugh","Costume Design: Chloe Moore","Sound Design: Elizabeth Cahill","Hair and Makeup Design: Livvy Waszak","Props Lead: Mariel Richardson","Choreography: Christopher Shin","Music Direction: Sariva Goetz","Stage Manager: Emma Alvarez-Roth","Production Supervisor: Blake Berggren","Dramaturg: David Estabrooks & Seramay Schultz"] },
+  
   { id: "antony-cleopatra-2024", title: "Antony & Cleopatra", role: "Lighting Designer", year: "2024", hero: PLACEHOLDER_HERO, blurb: "Epic politics and intimacy in contrast. Update later.", photos: ["/images/antony-cleopatra-1.jpg","/images/antony-cleopatra-2.jpg"], captions: ["Hero image","Battle sequence"], credits: ["By: Shakespeare","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
   { id: "hookman-2023", title: "Hookman", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Horror beats with playful shadows. Update later.", photos: ["/images/hookman-1.jpg","/images/hookman-2.jpg"], captions: ["Hero image","Climax"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
   { id: "evvy-awards-2023", title: "The 42nd Annual Evvy Awards", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Live broadcast polish and musical variety. Update later.", photos: ["/images/evvys-1.jpg","/images/evvys-2.jpg"], captions: ["Hero image","Musical number"], credits: ["Executive Producer: Name","Director: Name","Scenic Design: Name","Video: Name","Audio: Name","Stage Manager: Name"] },
