@@ -431,7 +431,7 @@ const Portfolio = () => {
                 <img
                   src={currentSrc}
                   alt={`${active.title} ${idx+1}`}
-                  className={`w-full h-auto max-h-[80svh] object-contain transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`
+                  className={`w-full h-auto max-h-[80svh] object-contain transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                   loading="eager"
                   decoding="async"
                   fetchpriority="high"
