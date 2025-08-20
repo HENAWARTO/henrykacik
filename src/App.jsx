@@ -477,4 +477,4 @@ export default function HenryKacikSite() {
     </div>
   );
 }
-export default HenryKacikSite;
+
