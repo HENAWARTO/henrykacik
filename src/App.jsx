@@ -11,13 +11,18 @@ const ABOUT = {
   bio: `I'm a Brooklyn-based lighting designer for theatre, concerts, and events, and a proud Emerson College alum. I fell in love with lighting design thanks to my brother, who first showed me how light could tell a story just as powerfully as words or music. Ten years later, I’m still chasing that magic. I approach every project with curiosity, creativity, and a storyteller’s eye, shaping light to set the mood, guide the audience, and make moments unforgettable.`,
 };
 
+const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\\//,'')}`;
 const PROJECTS = [
   { id: "great-comet-2024", 
    title: "Natasha, Pierre, and the Great Comet of 1812", 
    role: "Lighting Designer", 
-   year: "2024", hero: "/henrykacik/public/greatcomet/comet10.jpg", 
+   year: "2024", 
+   hero: pub("greatcomet/comet10.jpg"), 
    blurb: "Natasha, Pierre & The Great Comet of 1812 is an electrifying, immersive musical that blends Tolstoy’s War and Peace with a genre-defying score. Our design team channeled this mismatch into the design, resulting in a beautiful production.", 
-   photos: ["/henrykacik/public/greatcomet/comet1.jpg","/henrykacik/public/greatcomet/comet2.jpg","/henrykacik/public/greatcomet/comet3.jpg"], 
+   photos: [    pub("greatcomet/comet1.jpg"),
+    pub("greatcomet/comet2.jpg"),
+    pub("greatcomet/comet3.jpg")
+            ],
    captions: ["Pierre- Our protagonist is introduced. The lighting highlights the inner turmoil the song expresses.","Natasha and her future sister-in-law size one another up. The lights highlight their personality contrast.","The Dream Ballet the is The Opera launches the stage into a chaotic change."], 
    credits: ["By: Dave Malloy","Directed by: Bevin O'Gara","Scenic Design: Baron E. Pugh","Costume Design: Chloe Moore","Sound Design: Elizabeth Cahill","Hair and Makeup Design: Livvy Waszak","Props Lead: Mariel Richardson","Choreography: Christopher Shin","Music Direction: Sariva Goetz","Stage Manager: Emma Alvarez-Roth","Production Supervisor: Blake Berggren","Dramaturg: David Estabrooks & Seramay Schultz"] },
   
