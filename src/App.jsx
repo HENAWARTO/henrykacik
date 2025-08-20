@@ -6,7 +6,7 @@ import * as THREE from 'three';
 const PLACEHOLDER_HERO = "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1600&q=80";
 
 const ABOUT = {
-  photo: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop",
+  photo: "Henry Kacik.png",
   headline: "Henry Kacik Lighting Design",
   bio: `I'm a Brooklyn-based lighting designer for theatre, concerts, and events, and a proud Emerson College alum. I fell in love with lighting design thanks to my brother, who first showed me how light could tell a story just as powerfully as words or music. Ten years later, I’m still chasing that magic. I approach every project with curiosity, creativity, and a storyteller’s eye, shaping light to set the mood, guide the audience, and make moments unforgettable.`,
 };
