@@ -7,8 +7,8 @@ const PLACEHOLDER_HERO = "https://images.unsplash.com/photo-1529070538774-1843cb
 
 const ABOUT = {
   photo: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop",
-  headline: "Hi, I’m Henry — lighting designer.",
-  bio: `I design light for theatre, concerts, and the odd warehouse that wants to feel like a poem. Emerson alum, New York–based. I like saturated color, unapologetic contrast, and dimmers that behave. When I’m not plotting cues, I’m chasing good bread and better coffee.`,
+  headline: "Henry Kacik Lighting Design",
+  bio: `I'm a Brooklyn-based lighting designer for theatre, concerts, and events, and a proud Emerson College alum. I fell in love with lighting design thanks to my brother, who first showed me how light could tell a story just as powerfully as words or music. Ten years later, I’m still chasing that magic. I approach every project with curiosity, creativity, and a storyteller’s eye, shaping light to set the mood, guide the audience, and make moments unforgettable.`,
 };
 
 const PROJECTS = [
@@ -25,7 +25,7 @@ const PROJECTS = [
   { id: "rock-of-ages-2018", title: "Rock of Ages", role: "Lighting Designer", year: "2018", hero: PLACEHOLDER_HERO, blurb: "Arena-glam riffs and haze; big looks. Update later.", photos: ["/images/roa-1.jpg","/images/roa-2.jpg"], captions: ["Hero image","Finale"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] }
 ];
 
-const LINKS = { email: "henrykacik@gmail.com", phone: "+1 (970) 531-3977", location: "New York, NY", resumePdf: "/henry-kacik-resume.pdf" };
+const LINKS = { email: "hchkacik@gmail.com", phone: "+1 (970) 531-3977", location: "Brooklyn, NY", resumePdf: "/henry-kacik-resume.pdf" };
 
 const injectFonts = () => {
   const haveFraunces = document.querySelector('link[data-font="fraunces"]');
