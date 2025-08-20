@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import * as THREE from 'three';
 
-const PLACEHOLDER_HERO = "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1600&q=80";
+const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
+
+const PLACEHOLDER_HERO = pub("greatcomet/comet10.jpg");
 
 const ABOUT = {
   photo: "Henry Kacik.png",
@@ -11,7 +13,7 @@ const ABOUT = {
   bio: `I'm a Brooklyn-based lighting designer for theatre, concerts, and events, and a proud Emerson College alum. I fell in love with lighting design thanks to my brother, who first showed me how light could tell a story just as powerfully as words or music. Ten years later, I’m still chasing that magic. I approach every project with curiosity, creativity, and a storyteller’s eye, shaping light to set the mood, guide the audience, and make moments unforgettable.`,
 };
 
-const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
+
 
 const PROJECTS = [
  {
