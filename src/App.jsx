@@ -51,7 +51,7 @@ const PROJECTS = [
   credits: [
     "By: Dave Malloy",
     "Directed by: Bevin O'Gara",
-    "Production Electrician: Lauren Hodgkins"
+    "Production Electrician: Lauren Hodgkins",
     "Scenic Design: Baron E. Pugh",
     "Costume Design: Chloe Moore",
     "Sound Design: Elizabeth Cahill",
