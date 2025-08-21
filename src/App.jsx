@@ -218,7 +218,8 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const currentTitle = heroFrames[heroIdx]?.title || PROJECTS[0]?.title;
   const currentProject = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[heroIdx] || PROJECTS[0];
   const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const [phase] = useState(prefersReduced ? 'fallback' : 'particles');
+  const isSmallScreen = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 768px)').matches;
+  const [phase] = useState((prefersReduced || isSmallScreen) ? 'fallback' : 'particles');
 
   useEffect(() => { const preload = (u) => { const img = new Image(); img.decoding='async'; img.loading='eager'; img.src=u; }; preload(hero); const nextIdx = (heroIdx + 1) % heroFrames.length; if (heroFrames[nextIdx]) preload(heroFrames[nextIdx].src); }, [hero, heroIdx, heroFrames]);
 
@@ -465,8 +466,8 @@ const Portfolio = () => {
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
       <AnimatePresence>
         {active && (
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 grid place-items-center bg-black/95 p-2 sm:p-4">
-            <div className="w-full max-w-6xl">
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 grid place-items-center bg-black/95 p-2 sm:p-4 overflow-y-auto">
+            <div className="w-screen max-w-6xl overflow-hidden">
               <div className="mb-3 flex items-center justify-between text-white">
                 <div className="max-w-[70%]">
                   <div className="text-xs uppercase tracking-[0.2em] opacity-80">{active.role} — {active.year}</div>
