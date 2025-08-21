@@ -51,6 +51,7 @@ const PROJECTS = [
   credits: [
     "By: Dave Malloy",
     "Directed by: Bevin O'Gara",
+    "Production Electrician: Lauren Hodgkins"
     "Scenic Design: Baron E. Pugh",
     "Costume Design: Chloe Moore",
     "Sound Design: Elizabeth Cahill",
@@ -95,7 +96,7 @@ const PROJECTS = [
       "Octavius towers above in red light, dagger poised, framed by the deep shadow of Antony’s blue.",
       "Warm amber and low red wrap the last moment between Antony and Cleopatra, the colors blending briefly before fading to black."
     ], 
-    credits: ["By: Shakespeare","Directed by: Jake Tolentino","Scenic Design: Alex Serino","Sound Design: Emery Frost","Stage Manager: Alayna Domboski"] 
+    credits: ["By: Shakespeare","Directed by: Jake Tolentino", "Production Electrician: Spencer Swetlow", "Scenic Design: Alex Serino","Sound Design: Emery Frost","Stage Manager: Alayna Domboski"] 
   },
   { 
     id: "hookman-2023", 
@@ -150,7 +151,7 @@ const PROJECTS = [
       pub("evvys/evvy10.jpg"),
     ], 
     captions: [
-      "Guests gather for the Evvy's 42 Gala under warm and cool tones, the starry backdrop setting the tone for the evening.",
+      "Guests gather for the Evvy's 42 Gala under warm and cool tones, the starry backdrop setting the tone for the evening with a retrofuturism theme.",
       "The Opening Ceremony of the Gala begins.",
       "The show begins with a throwback to the 80s.",
       "Dancers take the stage for the opening number.",
@@ -163,6 +164,7 @@ const PROJECTS = [
     credits: [
       "Executive Producers: Esther Chilson, Fuschia Faulding Steward, Fallon Hellan, and Kate Kiladis",
       "Director: Lillian Sexton",
+      "Production Electrician: Lauren Hodgkins",
       "Scenic Design: Ariana Dookhran",
       "Editor: Zee Reichgut",
       "Audio: Susan Eyring",
@@ -199,6 +201,7 @@ const PROJECTS = [
               ], 
     credits: ["By: The Cast of Are You Someone to Somebody",
               "Directed by: Lindsay Beamish",
+              "Production Electrician: Mia Moore",
               "Scenic Design: Julia Wonkka",
               "Costume Design: Dom Letterii",
               "Sound Design: Miller Koppang",
@@ -210,17 +213,110 @@ const PROJECTS = [
     id: "one-direction-macbeth-2022", 
     title: "The One Direction Macbeth Musical", 
     role: "Lighting Designer", 
-    year: "2022", 
-    hero: PLACEHOLDER_HERO, 
-    blurb: "Pop satire meets tragedy; bold color story. Update later.", 
-    photos: ["/images/odm-1.jpg","/images/odm-2.jpg"], 
-    captions: ["Hero image","Concert look"], 
-    credits: ["Book: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "humble-boy-2021", title: "Humble Boy", role: "Lighting Designer", year: "2021", hero: PLACEHOLDER_HERO, blurb: "Garden light and family ghosts. Update later.", photos: ["/images/humble-boy-1.jpg","/images/humble-boy-2.jpg"], captions: ["Hero image","Garden dusk"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Stage Manager: Name"] },
-  { id: "addams-family-2019", title: "The Addams Family", role: "Lighting Designer", year: "2019", hero: PLACEHOLDER_HERO, blurb: "Macabre fun with crisp musical looks. Update later.", photos: ["/images/addams-1.jpg","/images/addams-2.jpg"], captions: ["Hero image","Dinner scene"], credits: ["Book: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "joseph-dreamcoat-2019", title: "Joseph and the Amazing Technicolor Dreamcoat", role: "Lighting & Scenic Designer", year: "2019", hero: PLACEHOLDER_HERO, blurb: "Color-forward design and playful spectacle. Update later.", photos: ["/images/joseph-1.jpg","/images/joseph-2.jpg"], captions: ["Hero image","Go-Go-Go Joseph"], credits: ["By: Lloyd Webber & Rice","Directed by: Name","Scenic Design: Henry Kacik","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "fiddler-2018", title: "Fiddler on the Roof", role: "Lighting Designer", year: "2018", hero: PLACEHOLDER_HERO, blurb: "Warmth and tradition with texture. Update later.", photos: ["/images/fiddler-1.jpg","/images/fiddler-2.jpg"], captions: ["Hero image","Sunrise, Sunset"], credits: ["By: Bock & Harnick","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] },
-  { id: "rock-of-ages-2018", title: "Rock of Ages", role: "Lighting Designer", year: "2018", hero: PLACEHOLDER_HERO, blurb: "Arena-glam riffs and haze; big looks. Update later.", photos: ["/images/roa-1.jpg","/images/roa-2.jpg"], captions: ["Hero image","Finale"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Music Direction: Name","Stage Manager: Name"] }
+    year: "2022",
+    hero: pub("macbeth/machbeth1.jpg"),
+    blurb: "The One Direction Macbeth Musical blends Shakespeare’s tragedy with the pop hits of One Direction, creating a surreal mash-up of ambition, fate, and catchy choruses. The lighting design leaned into the humor and drama, shifting quickly between concert-style energy and eerie theatrical tension.", 
+    photos: [
+      pub("macbeth/machbeth1.jpg"),
+      pub("macbeth/machbeth2.jpg"),
+      pub("macbeth/machbeth3.jpg"),
+      pub("macbeth/machbeth4.jpg"),
+      pub("macbeth/machbeth5.jpg")
+    ], 
+    captions: [
+      "Steeped in shadows, the witches speak prophecies to Macbeth.",
+      "Macbeth reaches out, back by the beautiful music of One Direction.",
+      "Macbeth gets the crown.",
+      "Ghosts haunt Macbeth",
+      "Macbeth is killed."
+              ], 
+    credits: ["By: Shakespeare","Directed by: Siena Brolin","Sound Design: Mateo Florez","Choreography: Siena Brolin","Music Direction: Name","Stage Manager: McKenna Tedford-Coles"] },
+  { 
+    id: "humble-boy-2021", 
+    title: "Humble Boy", 
+    role: "Lighting Designer", 
+    year: "2021", 
+    hero: pub("humbleboy/humble6.png"), 
+    blurb: "Set in a lush English garden, Humble Boy blends family drama, sharp wit, and a touch of the surreal. As secrets surface and relationships unravel, the characters confront love, loss, and what it means to move forward.", 
+    photos: [
+      pub("humbleboy/humble1.png"),
+      pub("humbleboy/humble2.png"), 
+      pub("humbleboy/humble3.png"), 
+      pub("humbleboy/humble4.png"), 
+      pub("humbleboy/humble5.png"), 
+      pub("humbleboy/humble6.png"), 
+      pub("humbleboy/humble7.png"), 
+      pub("humbleboy/humble8.png"), 
+      pub("humbleboy/humble9.png"), 
+      pub("humbleboy/humble10.png"), 
+            ], 
+    captions: [
+      "A quiet moment in the garden before the story begins.", 
+      "Felix and Jim share a tense conversation under the apple branches.",
+      "The table is set for the dinner that will change everything.",
+      "Flora stands ready to welcome her guests.",
+      "Flora adds the finishing touches to the dinner table.",
+      "The dinner party begins, with tensions already brewing.",
+      "Unspoken feelings weigh heavily over the table.",
+      "Rosie returns, stirring old memories and unresolved questions.",
+      "Flora delivers a toast that’s anything but simple.",
+      "The beehive hangs silently, watching over the unfolding drama."
+      
+    ], 
+    credits: ["By: Charlotte Jones","Directed by: Elena Freck","Scenic Design: Bella Pagan","Sound Design: Name","Stage Manager: Name"] },
+
+  { id: "fiddler-2018", 
+   title: "Fiddler on the Roof", 
+   role: "Lighting Designer", 
+   year: "2019", 
+   hero: pub("fiddler/fiddler7.tif"), 
+   blurb: "Set in the small Jewish village of Anatevka, Fiddler on the Roof follows Tevye, a poor milkman, as he struggles to balance tradition, family, and faith in a world rapidly changing around him. With humor, heart, and iconic songs, the musical celebrates love, resilience, and the ties that hold a community together.", 
+   photos: [
+     pub("fiddler/fiddler1.tif"),
+     pub("fiddler/fiddler2.tif"),
+     pub("fiddler/fiddler3.tif"),
+     pub("fiddler/fiddler4.tif"),
+     pub("fiddler/fiddler5.tif"),
+     pub("fiddler/fiddler6.tif"),
+     pub("fiddler/fiddler7.tif"),
+     pub("fiddler/fiddler8.tif"),
+     pub("fiddler/fiddler9.tif"),
+     pub("fiddler/fiddler10.tif")
+   ], 
+   captions: [
+     "Perchik speaks with Tevye's daughters.",
+     "The Constable tells the people of Anatevka that they must leave.",
+     "A scary dream finds Tevye in the night.",
+     "Tevye confides his dream in Golde",
+     "The scary dream intensifies.",
+     "Tevye's daughters sing about the perfect match.",
+     "Motel and Tzeitel marry.",
+     "The men of the village gather.",
+     "Tevye talks to Tzeitel as she plans to leave.",
+     "The village is cold without its spirit."
+   ], 
+   credits: ["By: Bock & Harnick","Directed by: Christal McDougal","Scenic Design: Christal McDougal","Costume Design: Lela Myers","Sound Design: Matthew Decicco","Music Direction: Erin Life","Stage Manager: Ruthie Everhart"] },
+  
+  { 
+    id: "rock-of-ages-2018", 
+    title: "Rock of Ages", 
+    role: "Lighting Designer", 
+    year: "2018", 
+    hero: pub("rockofages/rock1.jpg"),
+    blurb: "Rock of Ages is a high-energy, feel-good jukebox musical set in 1987 on L.A.’s famous Sunset Strip. When a small-town girl meets a big-city dreamer, their love story unfolds against the backdrop of The Bourbon Room, a legendary rock club under threat from corporate developers. Featuring iconic ’80s hits from bands like Journey, Bon Jovi, and Pat Benatar, it’s a loud, hilarious, and unapologetically fun celebration of big hair, big dreams, and even bigger rock anthems.", 
+    photos: [
+      pub("rockofages/rock1.jpg"),
+      pub("rockofages/rock2.jpg"),
+      pub("rockofages/rock3.jpg"),
+      pub("rockofages/rock4.jpg")
+    ], 
+    captions: [
+      "The dancers bring the heat in a high-energy number that captures the wild spirit of the Sunset Strip.",
+      "Corporate suits and construction crews arrive, threatening to tear down The Bourbon Room for a new development.",
+      "Lonnie and Dennis celebrate the bourbon room.",
+      "Rockers and misfits unite, strutting into the spotlight with swagger and attitude."
+    ], 
+    credits: ["By: Chris D'Arienzo","Directed by: Christal McDougal","Scenic Design: Christal McDougal","Costume Design: Lela Myers","Sound Design: Matthew Decicco","Music Direction: Erin Life","Stage Manager: Ruthie Everhart"] }
 
 ];
 
