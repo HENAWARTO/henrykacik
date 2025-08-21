@@ -37,9 +37,16 @@ const PROJECTS = [
     pub("greatcomet/comet10.jpg") 
   ],
   captions: [
-    "Pierre- Our protagonist is introduced. The lighting highlights the inner turmoil the song expresses.",
-    "Natasha and her future sister-in-law size one another up. The lights highlight their personality contrast.",
-    "The Dream Ballet that is The Opera launches the stage into a chaotic change."
+    "Pierre - Our main character takes the spotlight, with lighting showing the tension he’s feeling inside.",
+    "Natasha & The Bolkonskys - Natasha and her future sister-in-law size each other up, their differences clear in the contrast.",
+    "The Opera - The dream ballet of The Opera bursts onto the stage with a big, dramatic shift in lighting.",
+    "The Opera - Sonya sings to Natasha from her box. I got to use the actual theatre architecture here, and it quickly became a key part of the design.",
+    "The Duel - The party kicks off! The lighting moves fast and wild to match the cast’s energy.",
+    "The Duel - The party gets even bigger, with strobes and quick changes that felt even crazier in person.",
+    "Dust & Ashes - Soft blue light surrounds Pierre, matching the quiet and personal nature of the song.",
+    "Balaga - Bright, bold colors keep up with Balaga’s over-the-top energy.",
+    "A Call to Pierre - Marya’s desperation meets Pierre’s calm, shown through a cleaner, more focused look.",
+    "Finale - Hanging globes glow across the stage and in the architecture above the audience, creating our Great Comet of 1812."
   ],
   credits: [
     "By: Dave Malloy",
@@ -56,7 +63,17 @@ const PROJECTS = [
     "Dramaturg: David Estabrooks & Seramay Schultz"
   ]
  },
-  { id: "antony-cleopatra-2024", title: "Antony & Cleopatra", role: "Lighting Designer", year: "2024", hero: PLACEHOLDER_HERO, blurb: "Epic politics and intimacy in contrast. Update later.", photos: ["/images/antony-cleopatra-1.jpg","/images/antony-cleopatra-2.jpg"], captions: ["Hero image","Battle sequence"], credits: ["By: Shakespeare","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
+  { 
+    id: "antony-cleopatra-2024", 
+    title: "Antony & Cleopatra", 
+    role: "Lighting Designer", 
+    year: "2024", 
+    hero: pub("antonyandcleopatra/cleopatra7.jpg"), 
+    blurb: "Epic politics and intimacy in contrast. Update later.", 
+    photos: ["/images/antony-cleopatra-1.jpg","/images/antony-cleopatra-2.jpg"], 
+    captions: ["Hero image","Battle sequence"], 
+    credits: ["By: Shakespeare","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] 
+  },
   { id: "hookman-2023", title: "Hookman", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Horror beats with playful shadows. Update later.", photos: ["/images/hookman-1.jpg","/images/hookman-2.jpg"], captions: ["Hero image","Climax"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Choreography: Name","Music Direction: Name","Stage Manager: Name"] },
   { id: "evvy-awards-2023", title: "The 42nd Annual Evvy Awards", role: "Lighting Designer", year: "2023", hero: PLACEHOLDER_HERO, blurb: "Live broadcast polish and musical variety. Update later.", photos: ["/images/evvys-1.jpg","/images/evvys-2.jpg"], captions: ["Hero image","Musical number"], credits: ["Executive Producer: Name","Director: Name","Scenic Design: Name","Video: Name","Audio: Name","Stage Manager: Name"] },
   { id: "are-you-someone-2022", title: "Are You Someone to Somebody", role: "Lighting Designer", year: "2022", hero: PLACEHOLDER_HERO, blurb: "Chamber piece with delicate color. Update later.", photos: ["/images/ays-1.jpg","/images/ays-2.jpg"], captions: ["Hero image","Intimate scene"], credits: ["By: Name","Directed by: Name","Scenic Design: Name","Costume Design: Name","Sound Design: Name","Stage Manager: Name"] },
