@@ -132,19 +132,43 @@ const LightboxDetails = ({ active, idx }) => {
   const [open, setOpen] = useState(true);
   if (!active) return null;
   return (
-    <div className="mt-3 text-white/90">
+    <div className="mt-3 w-full text-white/90">
       <div className="flex items-center justify-between">
-        <button onClick={()=>setOpen(!open)} className="text-xs uppercase tracking-widest border border-white/30 rounded-full px-3 py-1 hover:bg-white hover:text-black transition">{open ? 'Hide details' : 'Show details'}</button>
+               <button
+          onClick={() => setOpen(!open)}
+          className="text-xs uppercase tracking-widest border border-white/30 rounded-full px-3 py-1 hover:bg-white hover:text-black transition"
+        >
+          {open ? 'Hide details' : 'Show details'}
+        </button>
       </div>
       <AnimatePresence>
         {open && (
-          <motion.div initial={{height:0, opacity:0}} animate={{height:'auto', opacity:1}} exit={{height:0, opacity:0}} className="overflow-hidden">
-            {active.captions && active.captions[idx] && (<div className="mt-3 text-sm">{active.captions[idx]}</div>)}
-            {active.credits && active.credits.length>0 && (
-              <div className="mt-3 whitespace-nowrap overflow-hidden">
-                <style>{`@keyframes marquee { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
-                <div className="flex gap-6 py-2" style={{ animation: 'marquee 18s linear infinite' }}>
-                  {[...active.credits, ...active.credits].map((c, i)=> (<span key={i} className="text-xs uppercase tracking-widest opacity-80">{c}</span>))}
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden w-full"
+          >
+            {active.captions && active.captions[idx] && (
+              <div className="mt-3 text-sm">{active.captions[idx]}</div>
+            )}
+            {active.credits && active.credits.length > 0 && (
+              <div className="mt-3 overflow-hidden w-full">
+                <style>
+                  {`@keyframes marquee { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}
+                </style>
+                <div
+                  className="flex gap-6 py-2 whitespace-nowrap"
+                  style={{ animation: 'marquee 18s linear infinite' }}
+                >
+                  {[...active.credits, ...active.credits].map((c, i) => (
+                    <span
+                      key={i}
+                      className="text-xs uppercase tracking-widest opacity-80"
+                    >
+                      {c}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
@@ -160,9 +184,24 @@ const Nav = ({ route, onNav, lxMode, setLxMode }) => {
   return (
     <nav className="fixed top-0 left-0 z-50 flex w-full justify-between pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
       <span className="text-2xl text-white mix-blend-difference" style={{ fontFamily: 'Fraunces, serif' }}>Henry Kacik</span>
-      <div className="flex gap-4">
-        {items.map(it => (<button key={it} onClick={()=>onNav(it)} className={`uppercase tracking-widest text-sm ${route===it?"underline":''} text-white mix-blend-difference`}>{it}</button>))}
-        <button onClick={()=>setLxMode(!lxMode)} aria-label="toggle transitions" title={lxMode ? 'LX Mode: theatrical cues on' : 'Smooth Mode: soft fades'} className="text-white mix-blend-difference px-2 py-1 border border-white/40 rounded-full">{lxMode ? <Play className="h-4 w-4"/> : <Square className="h-4 w-4"/>}</button>
+      <div className="flex gap-4 overflow-x-auto whitespace-nowrap">
+        {items.map(it => (
+          <button
+            key={it}
+            onClick={() => onNav(it)}
+            className={`uppercase tracking-widest text-sm ${route === it ? "underline" : ''} text-white mix-blend-difference`}
+          >
+            {it}
+          </button>
+        ))}
+        <button
+          onClick={() => setLxMode(!lxMode)}
+          aria-label="toggle transitions"
+          title={lxMode ? 'LX Mode: theatrical cues on' : 'Smooth Mode: soft fades'}
+          className="text-white mix-blend-difference px-2 py-1 border border-white/40 rounded-full"
+        >
+          {lxMode ? <Play className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+        </button>
       </div>
     </nav>
   );
@@ -195,13 +234,28 @@ const Hero = ({ onSeeWork, onNavigate }) => {
     <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
       {phase === 'fallback' && (
         <>
-          <style>{`@keyframes kenburnsA { 0%{transform:scale(1) translate3d(0,0,0)} 100%{transform:scale(1.08) translate3d(2%, -2%, 0)} } @keyframes kenburnsB { 0%{transform:scale(1.05) translate3d(0,0,0)} 100%{transform:scale(1.1) translate3d(-2%, 2%, 0)} }`}</style>
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:1.0}} className="absolute inset-0" style={{ backgroundImage: `url(${hero})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-            <div className="absolute inset-0" style={{ animation: 'kenburnsA 18s ease-out forwards' }} />
-          </motion.div>
-          <motion.div initial={{opacity:0}} animate={{opacity:.35}} transition={{duration:2.4, delay:.6}} className="absolute inset-0 mix-blend-screen" style={{ backgroundImage: `url(${hero})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-            <div className="absolute inset-0" style={{ animation: 'kenburnsB 22s ease-out forwards' }} />
-          </motion.div>
+   <style>
+            {`@keyframes kenburnsA { 0%{transform:scale(1) translate3d(0,0,0)} 100%{transform:scale(1.08) translate3d(2%, -2%, 0)} }
+              @keyframes kenburnsB { 0%{transform:scale(1.05) translate3d(0,0,0)} 100%{transform:scale(1.1) translate3d(-2%, 2%, 0)} }`}
+          </style>
+          <motion.img
+            src={hero}
+            alt="Hero background"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.0 }}
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ animation: 'kenburnsA 18s ease-out forwards' }}
+          />
+          <motion.img
+            src={hero}
+            alt="Hero overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.35 }}
+            transition={{ duration: 2.4, delay: 0.6 }}
+            className="absolute inset-0 h-full w-full object-cover mix-blend-screen"
+            style={{ animation: 'kenburnsB 22s ease-out forwards' }}
+          />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
         </>
       )}
