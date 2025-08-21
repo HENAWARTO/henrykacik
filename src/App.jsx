@@ -5,8 +5,6 @@ import * as THREE from 'three';
 
 const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
 
-const PLACEHOLDER_HERO = pub("greatcomet/comet10.jpg");
-
 const ABOUT = {
   photo: "Henry Kacik.png",
   headline: "Henry Kacik Lighting Design",
@@ -462,10 +460,10 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const heroFrames = useMemo(() => PROJECTS.map(p => ({ src: p.hero, title: p.title })), []);
   const [heroIdx, setHeroIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0] || PLACEHOLDER_HERO;
+  const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0];
   const isHttp = typeof rawHero === 'string' && rawHero.startsWith('http');
   const heroBlocked = isHttp && (rawHero.includes('imgur.com/a/') || rawHero.includes('/gallery/') || rawHero.includes('drive.google.com'));
-  const hero = (!isHttp || heroBlocked) ? PLACEHOLDER_HERO : rawHero;
+  const hero = heroBlocked ? PROJECTS[0]?.photos?.[0] : rawHero;
   const currentTitle = heroFrames[heroIdx]?.title || PROJECTS[0]?.title;
   const currentProject = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[heroIdx] || PROJECTS[0];
   const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -651,7 +649,12 @@ const ParticleHero = ({ imageUrl }) => {
       imageUrl,
       (tex) => { tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); renderer.render(scene, camera); },
       undefined,
-      () => { loader.load(PLACEHOLDER_HERO, (tex)=>{ tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); }); }
+      () => {
+        const fallback = PROJECTS[0]?.photos?.[0];
+        if (fallback) {
+          loader.load(fallback, (tex)=>{ tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); });
+        }
+      }
     );
 
     const onResize = () => { const w = container.clientWidth, h = container.clientHeight; renderer.setSize(w, h, true); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); uniforms.u_res.value.set(w, h); };
