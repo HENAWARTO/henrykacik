@@ -212,7 +212,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           </motion.div>
         </AnimatePresence>
       )}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }} className="relative z-10 mx-auto max-w-5xl px-6 pt-28 md:pt-40">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }} className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-28 md:pt-40">
         <h1 className="tracking-tight" style={{ fontFamily: '"Fraunces", serif', fontSize: 'clamp(2.4rem,7vw,5.5rem)' }}>{ABOUT.headline}</h1>
         <div className="mt-2 text-white/80" style={{ fontSize: 'clamp(1rem,2.2vw,1.25rem)' }}>Featured: {currentTitle}</div>
         {currentProject?.captions && currentProject.captions[0] && (<div className="mt-1 text-white/70 text-sm">{currentProject.captions[0]}</div>)}
@@ -376,9 +376,9 @@ const ProjectCard = ({ project }) => {
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
-      <div className="md:col-span-8 aspect-[16/9] md:aspect-auto md:h-[70svh] overflow-hidden group relative bg-black">
+      <div className="md:col-span-8 aspect-[4/3] md:aspect-auto md:h-[70svh] overflow-hidden group relative bg-black">
         {visible && (
-          <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-contain md:object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 1024px) 66vw, 100vw"/>
+          <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 1024px) 66vw, 100vw"/>
         )}
         <button onClick={open} className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition">Open Gallery</button>
       </div>
@@ -411,7 +411,7 @@ const Portfolio = () => {
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
       <AnimatePresence>
         {active && (
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 grid place-items-center bg-black/95 p-4">
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 grid place-items-center bg-black/95 p-2 sm:p-4">
             <div className="w-full max-w-6xl">
               <div className="mb-3 flex items-center justify-between text-white">
                 <div className="max-w-[70%]">
@@ -431,7 +431,7 @@ const Portfolio = () => {
                 <img
                   src={currentSrc}
                   alt={`${active.title} ${idx+1}`}
-                  className={`w-full h-auto max-h-[80svh] object-contain transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  className={`w-auto h-auto max-h-[92svh] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] object-contain transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`
                   loading="eager"
                   decoding="async"
                   fetchpriority="high"
