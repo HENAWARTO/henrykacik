@@ -466,9 +466,9 @@ const Portfolio = () => {
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
       <AnimatePresence>
         {active && (
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 grid place-items-center bg-black/95 p-2 sm:p-4 overflow-y-auto">
-            <div className="w-screen max-w-6xl overflow-hidden">
-              <div className="mb-3 flex items-center justify-between text-white">
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 bg-black/95 p-2 sm:p-4 overflow-y-auto flex justify-center">
+            <div className="w-screen max-w-6xl">
+              <div className="sticky top-0 z-10 mb-3 flex items-center justify-between text-white bg-black/95 pb-3">
                 <div className="max-w-[70%]">
                   <div className="text-xs uppercase tracking-[0.2em] opacity-80">{active.role} — {active.year}</div>
                   <div className="text-lg font-semibold">{active.title}</div>
@@ -483,15 +483,24 @@ const Portfolio = () => {
                 {!imgLoaded && (
                   <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
                 )}
-                <img
-                  src={currentSrc}
-                  alt={`${active.title} ${idx+1}`}
-                  className={`w-auto h-auto max-h-[92svh] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] object-contain transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  loading="eager"
-                  decoding="async"
-                  fetchpriority="high"
-                  onLoad={() => setImgLoaded(true)}
-                />
+                <AnimatePresence mode="wait">
+                  {currentSrc && (
+                    <motion.img
+                      key={currentSrc}
+                      src={currentSrc}
+                      alt={`${active.title} ${idx+1}`}
+                      className="w-auto h-auto max-h-[92svh] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] object-contain"
+                      loading="eager"
+                      decoding="async"
+                      fetchpriority="high"
+                      initial={{opacity:0}}
+                      animate={{opacity:1}}
+                      exit={{opacity:0}}
+                      transition={{duration:0.5}}
+                      onLoad={() => setImgLoaded(true)}
+                    />
+                  )}
+                </AnimatePresence>
               </motion.div>
               <LightboxDetails active={active} idx={idx} />
               <div className="mt-3 flex items-center justify-between text-white/80">
@@ -580,7 +589,7 @@ export default function HenryKacikSite() {
           </motion.div>
         ) : (
           <AnimatePresence mode="wait">
-            <motion.div key={renderRoute} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.45, ease:'easeInOut'}}>
+            <motion.div key={renderRoute} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.6, ease:'easeInOut'}}>
               <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
               <main>
                 {renderRoute === "home" && <Hero onSeeWork={onSeeWork} onNavigate={go} />}
