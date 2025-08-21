@@ -115,7 +115,7 @@ const PROJECTS = [
      pub("hookman/hookman7.jpg"),
      pub("hookman/hookman8.jpg"),
      pub("hookman/hookman9.jpg"),
-     pub("hookman/hookman10.jpg"),
+     pub("hookman/hookman10.jpg")
    ], 
    captions: [
     "Lex drives with Jess in the passenger seat, bathed in cool tones with just a trace of red—a quiet hint of danger ahead.",
@@ -148,7 +148,7 @@ const PROJECTS = [
       pub("evvys/evvy7.jpg"),
       pub("evvys/evvy8.jpg"),
       pub("evvys/evvy9.jpg"),
-      pub("evvys/evvy10.jpg"),
+      pub("evvys/evvy10.jpg")
     ], 
     captions: [
       "Guests gather for the Evvy's 42 Gala under warm and cool tones, the starry backdrop setting the tone for the evening with a retrofuturism theme.",
@@ -186,7 +186,7 @@ const PROJECTS = [
       pub("devised/devised7.jpg"),
       pub("devised/devised8.jpg"),
       pub("devised/devised9.jpg"),
-      pub("devised/devised10.jpeg"),
+      pub("devised/devised10.jpeg")
     ], 
     captions: ["Three boxes made up part of the world of this show, dividing certain characters from reality and preserving them in the boxes.",
                "The boxes originated early in the design process and became integral to the devising process.",
@@ -248,7 +248,7 @@ const PROJECTS = [
       pub("humbleboy/humble7.png"), 
       pub("humbleboy/humble8.png"), 
       pub("humbleboy/humble9.png"), 
-      pub("humbleboy/humble10.png"), 
+      pub("humbleboy/humble10.png")
             ], 
     captions: [
       "A quiet moment in the garden before the story begins.", 
