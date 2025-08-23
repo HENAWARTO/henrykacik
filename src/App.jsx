@@ -685,7 +685,7 @@ const ProjectCard = ({ project }) => {
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
-      <div className="md:col-span-8 aspect-[4/3] md:aspect-auto md:h-[70svh] overflow-hidden group relative bg-black">
+       <div className="md:col-span-8 aspect-[4/3] overflow-hidden group relative bg-black">
         {visible && (
           <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 1024px) 66vw, 100vw"/>
         )}
