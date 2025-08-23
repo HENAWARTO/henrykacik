@@ -579,8 +579,9 @@ const ParticleHero = ({ imageUrl }) => {
         float tr = tRes.x / tRes.y;
         if(r > tr){
           uv.x = (uv.x - 0.5) * (tr / r) + 0.5;
-                  } else {
-          uv.y = (uv.y - 0.5) * (r / tr) + 0.5
+        } else {
+          uv.y = (uv.y - 0.5) * (r / tr) + 0.5;
+
         }
         return uv;
       }
