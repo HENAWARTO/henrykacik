@@ -587,7 +587,7 @@ const ParticleHero = ({ imageUrl }) => {
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
       void main(){
         vec2 uv = vUv;
-        vec2 texUV = containUv(uv, u_res, u_texRes);
+        vec2 texUV = coverUv(uv, u_res, u_texRes);
         if(any(lessThan(texUV, vec2(0.0))) || any(greaterThan(texUV, vec2(1.0)))){ gl_FragColor = vec4(0.0); return; }
         vec3 base = texture2D(u_tex, texUV).rgb;
         vec2 mousePos = u_mouse;
