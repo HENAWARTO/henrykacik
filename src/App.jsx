@@ -694,11 +694,27 @@ const ProjectCard = ({ project }) => {
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
-       <div className="md:col-span-8 aspect-[4/3] overflow-hidden group relative bg-black">
+      <div className="md:col-span-8 overflow-hidden group relative bg-black">
         {visible && (
-          <motion.img initial={{opacity:0, scale:1.02}} animate={{opacity:1, scale:1}} transition={{duration:0.7, ease:'easeOut'}} src={project.hero} alt={project.title} className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 1024px) 66vw, 100vw"/>
+          <motion.img
+            initial={{opacity:0, scale:1.02}}
+            animate={{opacity:1, scale:1}}
+            transition={{duration:0.7, ease:'easeOut'}}
+            src={project.hero}
+            alt={project.title}
+            className="w-full h-auto object-contain transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            sizes="(min-width: 1024px) 66vw, 100vw"
+          />
         )}
-        <button onClick={open} className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition">Open Gallery</button>
+       <button
+          onClick={open}
+          className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition"
+        >
+          Open Gallery
+        </button>
       </div>
       <motion.div initial={{opacity:0}} animate={{opacity:visible?1:0}} transition={{duration:0.6, delay:0.2}} className="md:col-span-4 flex flex-col justify-center bg-black text-white p-12">
         <h2 className="font-serif text-4xl mb-4">{project.title}</h2>
