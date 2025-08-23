@@ -494,7 +494,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.0 }}
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-contain object-center"
             style={{ animation: 'kenburnsA 18s ease-out forwards' }}
           />
           <motion.img
@@ -503,7 +503,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.35 }}
             transition={{ duration: 2.4, delay: 0.6 }}
-            className="absolute inset-0 h-full w-full object-cover mix-blend-screen"
+            className="absolute inset-0 h-full w-full object-contain object-center mix-blend-screen"
             style={{ animation: 'kenburnsB 22s ease-out forwards' }}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
@@ -574,20 +574,20 @@ const ParticleHero = ({ imageUrl }) => {
       uniform float u_time;
       uniform vec2 u_mouse;
       uniform float u_brush;
-            vec2 coverUv(vec2 uv, vec2 iRes, vec2 tRes){
+            vec2 containUv(vec2 uv, vec2 iRes, vec2 tRes){
         float r = iRes.x / iRes.y;
         float tr = tRes.x / tRes.y;
         if(r > tr){
-          uv.y = (uv.y - 0.5) * (r / tr) + 0.5;
-        } else {
           uv.x = (uv.x - 0.5) * (tr / r) + 0.5;
+                  } else {
+          uv.y = (uv.y - 0.5) * (r / tr) + 0.5
         }
         return uv;
       }
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
       void main(){
         vec2 uv = vUv;
-        vec2 texUV = coverUv(uv, u_res, u_texRes);
+        vec2 texUV = containUv(uv, u_res, u_texRes);
         if(any(lessThan(texUV, vec2(0.0))) || any(greaterThan(texUV, vec2(1.0)))){ gl_FragColor = vec4(0.0); return; }
         vec3 base = texture2D(u_tex, texUV).rgb;
         vec2 mousePos = u_mouse;
