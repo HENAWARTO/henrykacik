@@ -574,11 +574,11 @@ const ParticleHero = ({ imageUrl }) => {
       uniform float u_time;
       uniform vec2 u_mouse;
       uniform float u_brush;
-      vec2 coverUv(vec2 uv, vec2 iRes, vec2 tRes){ float r = iRes.x / iRes.y, tr = tRes.x / tRes.y; if(r > tr) uv.y = (uv.y - 0.5) * (r / tr) + 0.5; else uv.x = (uv.x - 0.5) * (tr / r) + 0.5; return uv; }
+      vec2 containUv(vec2 uv, vec2 iRes, vec2 tRes){ float r = iRes.x / iRes.y, tr = tRes.x / tRes.y; if(r > tr) uv.x = (uv.x - 0.5) * (tr / r) + 0.5; else uv.y = (uv.y - 0.5) * (r / tr) + 0.5; return uv; }
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
       void main(){
         vec2 uv = vUv;
-        vec2 texUV = coverUv(uv, u_res, u_texRes);
+        vec2 texUV = containUv(uv, u_res, u_texRes);
         if(any(lessThan(texUV, vec2(0.0))) || any(greaterThan(texUV, vec2(1.0)))){ gl_FragColor = vec4(0.0); return; }
         vec3 base = texture2D(u_tex, texUV).rgb;
         vec2 mousePos = u_mouse;
