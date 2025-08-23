@@ -494,7 +494,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.0 }}
-            className="absolute inset-0 h-full w-full object-contain object-center"
+            className="absolute inset-0 h-full w-full object-cover object-center"
             style={{ animation: 'kenburnsA 18s ease-out forwards' }}
           />
           <motion.img
@@ -503,7 +503,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.35 }}
             transition={{ duration: 2.4, delay: 0.6 }}
-            className="absolute inset-0 h-full w-full object-contain object-center mix-blend-screen"
+            className="absolute inset-0 h-full w-full object-cover object-center mix-blend-screen"
             style={{ animation: 'kenburnsB 22s ease-out forwards' }}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
@@ -703,7 +703,7 @@ const ProjectCard = ({ project }) => {
             transition={{duration:0.7, ease:'easeOut'}}
             src={project.hero}
             alt={project.title}
-            className="w-full h-auto object-contain transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-auto object-cover object-center transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
             decoding="async"
             fetchpriority="low"
