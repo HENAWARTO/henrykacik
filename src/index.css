@@ -10,3 +10,13 @@ html, body, #root {
 img {
   image-orientation: from-image;
 }
+
+/* --- image safety reset --- */
+img, video, canvas {
+  max-width: 100%;
+  height: auto;          /* never stretch to an arbitrary height */
+}
+
+/* handy opt-in helpers if you want them */
+img[data-fit="cover"]   { width: 100%; height: 100%; object-fit: cover;  object-position: center; }
+img[data-fit="contain"] { width: 100%; height: 100%; object-fit: contain; object-position: center; }
