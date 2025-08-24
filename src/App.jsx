@@ -468,23 +468,24 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const hero = heroBlocked ? PROJECTS[0]?.photos?.[0] : rawHero;
   const currentTitle = heroFrames[heroIdx]?.title || PROJECTS[0]?.title;
   const currentProject = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[heroIdx] || PROJECTS[0];
-  const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const coarsePointer = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches;
 
   useEffect(() => { const preload = (u) => { const img = new Image(); img.decoding='async'; img.loading='eager'; img.src=u; }; preload(hero); const nextIdx = (heroIdx + 1) % heroFrames.length; if (heroFrames[nextIdx]) preload(heroFrames[nextIdx].src); }, [hero, heroIdx, heroFrames]);
 
   useEffect(() => { if (!hero) return; const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image'; link.href = hero; document.head.appendChild(link); return () => { try { document.head.removeChild(link); } catch(e){} }; }, [hero]);
 
   useEffect(() => {
-    if (prefersReduced) return;
+    if (prefersReduced || coarsePointer) return;
     const id = setInterval(() => { if (!paused) setHeroIdx(i => (i + 1) % heroFrames.length); }, 8000);
     return () => clearInterval(id);
-  }, [paused, heroFrames.length, prefersReduced]);
+  }, [paused, heroFrames.length, prefersReduced, coarsePointer]);
 
   useEffect(() => { setShaderReady(false); }, [hero]);
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
-      {(prefersReduced || !shaderReady) && (
+      {(prefersReduced || coarsePointer || !shaderReady) && (
         <motion.img
           src={hero}
           alt="Hero background"
@@ -498,7 +499,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           fetchpriority="high"
         />
       )}
-       {!prefersReduced && (
+       {!prefersReduced && !coarsePointer && (
    <AnimatePresence initial={false}>
      <motion.div
        key={`${heroIdx}-${shaderReady ? 'ready' : 'loading'}`}
