@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/henrykacik/' // correct for project pages
+  base: '/' // use root base for custom domain deployment
 })
