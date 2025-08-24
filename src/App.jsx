@@ -497,10 +497,6 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           decoding="async"
           fetchpriority="high"
         />
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-        />
       )}
       {!prefersReduced && (
         <AnimatePresence initial={false}>
@@ -777,22 +773,10 @@ const ProjectCard = ({ project }) => {
       onLoad={(e) => {
         const w = e.target.naturalWidth || 16;
         const h = e.target.naturalHeight || 9;
-        setRatioStr(`${w} / ${h`);
-      }}
-    />
-  )}
-            initial={{opacity:0, scale:1.02}}
-            animate={{opacity:1, scale:1}}
-            transition={{duration:0.7, ease:'easeOut'}}
-            src={project.hero}
-            alt={project.title}
-            className="w-full h-full object-contain object-center transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
-            decoding="async"
-            fetchpriority="low"
-            sizes="(min-width: 1024px) 66vw, 100vw"
-            </div>
-        )}
+          setRatioStr(`${w} / ${h}`);
+        }}
+      />
+    )}
        <button
           onClick={open}
           className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition"
@@ -851,7 +835,7 @@ const Portfolio = () => {
                     <motion.img
                       key={currentSrc}
                       src={currentSrc}
-                      alt={`${active.title} ${idx+1}`}
+                      alt={active.title + ' ' + (idx + 1)}
                       className="w-auto h-auto max-h-[92svh] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] object-contain"
                       style={{ objectFit: 'contain', objectPosition: 'center' }}
                       loading="eager"
