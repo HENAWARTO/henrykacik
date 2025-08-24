@@ -582,11 +582,13 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         return uv;
       }
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+      vec3 texRGB(vec2 uv){ return texture2D(u_tex, clamp(uv, 0.0, 1.0)).rgb; }
+      float edgeDist(vec2 uv){ vec2 d = min(uv, 1.0 - uv); return min(d.x, d.y); }
       void main(){
         vec2 uv = vUv;
         vec2 texUV = coverUv(uv, u_res, u_texRes);
         texUV = clamp(texUV, 0.0, 1.0);
-        vec3 base = texture2D(u_tex, texUV).rgb;
+        vec3 base = texRGB(texUV);
         vec2 mousePos = u_mouse;
         vec2 asp = vec2(u_res.x / u_res.y, 1.0);
         vec2 rel = (uv - mousePos) * asp;
@@ -607,12 +609,18 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         ang += cos(texUV.x*34.0 - u_time*0.25);
         ang += sin((texUV.x+texUV.y)*18.0 + u_time*0.18);
         vec2 dir = normalize(vec2(cos(ang), sin(ang)));
-        vec3 acc = vec3(0.0); float tot = 0.0; float stroke = 0.0055 * max(amt, 0.15);
-        for(int i=0;i<11;i++){ float s=float(i)-5.0; float w=exp(-s*s/12.0); acc += texture2D(u_tex, texUV + dir * s * stroke).rgb * w; tot+=w; }
-        vec3 stroke1 = acc / max(tot, 1e-5);
         vec2 dir2 = vec2(-dir.y, dir.x);
-        vec3 acc2 = vec3(0.0); float tot2 = 0.0; float stroke2 = 0.0032 * max(amt, 0.12);
-        for(int j=0;j<7;j++){ float s2=float(j)-3.0; float w2=exp(-s2*s2/8.0); acc2 += texture2D(u_tex, texUV + dir2 * s2 * stroke2).rgb * w2; tot2+=w2; }
+        float stroke = 0.0055 * max(amt, 0.15);
+        float stroke2 = 0.0032 * max(amt, 0.12);
+        float maxKernel = max(5.0 * stroke, 3.0 * stroke2);
+        float guard = smoothstep(0.0, maxKernel * 1.3, edgeDist(texUV));
+        stroke *= guard;
+        stroke2 *= guard;
+        vec3 acc = vec3(0.0); float tot = 0.0;
+        for(int i=0;i<11;i++){ float s=float(i)-5.0; float w=exp(-s*s/12.0); acc += texRGB(texUV + dir * s * stroke) * w; tot+=w; }
+        vec3 stroke1 = acc / max(tot, 1e-5);
+        vec3 acc2 = vec3(0.0); float tot2 = 0.0;
+        for(int j=0;j<7;j++){ float s2=float(j)-3.0; float w2=exp(-s2*s2/8.0); acc2 += texRGB(texUV + dir2 * s2 * stroke2) * w2; tot2+=w2; }
         vec3 stroke2c = acc2 / max(tot2, 1e-5);
         vec3 paint = mix(stroke1, stroke2c, 0.35);
         float levels = mix(7.0, 18.0, brushMask);
@@ -623,8 +631,8 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         float sparkle = smoothstep(0.995, 1.0, hash(texUV*vec2(800.0, 600.0) + u_time*0.02));
         vec3 stars = vec3(sparkle) * (1.0 - brushMask) * 0.12;
         vec2 px = 1.0 / u_texRes; float gx=0.0, gy=0.0;
-        gx += texture2D(u_tex, texUV + vec2(-px.x, 0.0)).r - texture2D(u_tex, texUV + vec2(px.x, 0.0)).r;
-        gy += texture2D(u_tex, texUV + vec2(0.0, -px.y)).r - texture2D(u_tex, texUV + vec2(0.0, px.y)).r;
+        gx += texRGB(texUV + vec2(-px.x, 0.0)).r - texRGB(texUV + vec2(px.x, 0.0)).r;
+        gy += texRGB(texUV + vec2(0.0, -px.y)).r - texRGB(texUV + vec2(0.0, px.y)).r;
         float edge = clamp(length(vec2(gx,gy))*1.6, 0.0, 1.0);
         paint = mix(paint, paint*1.08, edge*0.5);
         vec3 color = mix(base, paint, amt);
@@ -657,6 +665,8 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         tex.generateMipmaps = true;
         tex.minFilter = THREE.LinearMipmapLinearFilter;
         tex.magFilter = THREE.LinearFilter;
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         uniforms.u_tex.value = tex;
         const iw = tex.image.naturalWidth || tex.image.width;
@@ -674,6 +684,8 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
             tex.generateMipmaps = true;
             tex.minFilter = THREE.LinearMipmapLinearFilter;
             tex.magFilter = THREE.LinearFilter;
+            tex.wrapS = THREE.ClampToEdgeWrapping;
+            tex.wrapT = THREE.ClampToEdgeWrapping;
             tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
             uniforms.u_tex.value = tex;
             const iw = tex.image.naturalWidth || tex.image.width;
