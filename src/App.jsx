@@ -515,8 +515,12 @@ const Hero = ({ onSeeWork, onNavigate }) => {
          onError={() => setShaderReady(false)}
        />
      </motion.div>
-   </AnimatePresence>
+  </AnimatePresence>
  )}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: 'radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.85) 90%, black 100%)' }}
+      />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }} className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-28 md:pt-40">
         <h1 className="tracking-tight" style={{ fontFamily: '"Fraunces", serif', fontSize: 'clamp(2.4rem,7vw,5.5rem)' }}>{ABOUT.headline}</h1>
