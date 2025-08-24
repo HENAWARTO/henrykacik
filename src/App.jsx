@@ -491,7 +491,12 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.0 }}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full"
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
           loading="eager"
           decoding="async"
           fetchpriority="high"
@@ -748,13 +753,34 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
 const ProjectCard = ({ project }) => {
   const opts = useMemo(() => ({ threshold: 0.2 }), []);
   const [ref, visible] = useLazyLoad(opts);
-  const [ratio, setRatio] = useState(16/9);
+  const [ratioStr, setRatioStr] = useState('16 / 9');
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
-      <div className="md:col-span-8 overflow-hidden group relative bg-black" style={{ aspectRatio: (Number.isFinite(ratio) && ratio > 0) ? ratio : (16/9) }}>
-        {visible && (
-          <motion.img
+     <div
+  className="md:col-span-8 overflow-hidden group relative bg-black"
+  style={{ aspectRatio: ratioStr }}
+>
+  {visible && (
+    <motion.img
+      initial={{opacity:0, scale:1.02}}
+      animate={{opacity:1, scale:1}}
+      transition={{duration:0.7, ease:'easeOut'}}
+      src={project.hero}
+      alt={project.title}
+      className="w-full h-full"
+      style={{ objectFit: 'contain', objectPosition: 'center' }}
+      loading="lazy"
+      decoding="async"
+      fetchpriority="low"
+      sizes="(min-width: 1024px) 66vw, 100vw"
+      onLoad={(e) => {
+        const w = e.target.naturalWidth || 16;
+        const h = e.target.naturalHeight || 9;
+        setRatioStr(`${w} / ${h`);
+      }}
+    />
+  )}
             initial={{opacity:0, scale:1.02}}
             animate={{opacity:1, scale:1}}
             transition={{duration:0.7, ease:'easeOut'}}
@@ -765,8 +791,7 @@ const ProjectCard = ({ project }) => {
             decoding="async"
             fetchpriority="low"
             sizes="(min-width: 1024px) 66vw, 100vw"
-            onLoad={(e)=>setRatio(e.target.naturalWidth / e.target.naturalHeight)}
-          />
+            </div>
         )}
        <button
           onClick={open}
@@ -828,6 +853,7 @@ const Portfolio = () => {
                       src={currentSrc}
                       alt={`${active.title} ${idx+1}`}
                       className="w-auto h-auto max-h-[92svh] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] object-contain"
+                      style={{ objectFit: 'contain', objectPosition: 'center' }}
                       loading="eager"
                       decoding="async"
                       fetchpriority="high"
