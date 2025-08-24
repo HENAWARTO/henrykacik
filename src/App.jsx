@@ -482,33 +482,16 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
       <>
-        <style>
-          {`@keyframes kenburnsA { 0%{transform:scale(1) translate3d(0,0,0)} 100%{transform:scale(1.08) translate3d(2%, -2%, 0)} }
-            @keyframes kenburnsB { 0%{transform:scale(1.05) translate3d(0,0,0)} 100%{transform:scale(1.1) translate3d(-2%, 2%, 0)} }`}
-        </style>
         <motion.img
           src={hero}
           alt="Hero background"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.0 }}
-          className="absolute inset-0 w-full h-full object-contain"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-full max-h-full object-contain"
           loading="eager"
           decoding="async"
           fetchpriority="high"
-          style={{ animation: 'kenburnsA 18s ease-out forwards' }}
-        />
-        <motion.img
-          src={hero}
-          alt="Hero overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.35 }}
-          transition={{ duration: 2.4, delay: 0.6 }}
-          className="absolute inset-0 w-full h-full object-contain mix-blend-screen"
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-          style={{ animation: 'kenburnsB 22s ease-out forwards' }}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
       </>
