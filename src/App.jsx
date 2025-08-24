@@ -485,21 +485,20 @@ const Hero = ({ onSeeWork, onNavigate }) => {
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
-      {(prefersReduced || coarsePointer || !shaderReady) && (
-        <motion.img
-          src={hero}
-          alt="Hero background"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.0 }}
-          className="absolute inset-0 w-full h-full"
-          style={{ objectFit: 'contain', objectPosition: 'center' }}
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-        />
-      )}
-       {!prefersReduced && !coarsePointer && (
+      <motion.img
+        key={hero}
+        src={hero}
+        alt="Hero background"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.0 }}
+        className="absolute inset-0 w-full h-full"
+        style={{ objectFit: 'contain', objectPosition: 'center' }}
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      {!prefersReduced && !coarsePointer && (
    <AnimatePresence initial={false}>
      <motion.div
        key={`${heroIdx}-${shaderReady ? 'ready' : 'loading'}`}
@@ -902,7 +901,7 @@ const About = ({ onNavigate }) => (
     <SectionTitle>About</SectionTitle>
     <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-8 items-center">
       <div className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <img src={ABOUT.photo} className="w-full h-auto block" loading="lazy" decoding="async" fetchpriority="low" sizes="(min-width: 768px) 40vw, 90vw"/>
+        <img src={ABOUT.photo} className="w-full h-auto block" loading="eager" decoding="async" fetchpriority="high" sizes="(min-width: 768px) 40vw, 90vw"/>
       </div>
       <div className="md:col-span-7">
         <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>{ABOUT.headline}</h3>
@@ -952,14 +951,16 @@ export default function HenryKacikSite() {
   useEffect(() => {
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       requestIdleCallback(() => {
+        const preload = (u, eager = false) => {
+          if (!u) return;
+          const img = new Image();
+          img.decoding = 'async';
+          img.loading = eager ? 'eager' : 'lazy';
+          img.src = u;
+        };
+        preload(ABOUT.photo, true);
         PROJECTS.forEach(p => {
-          [p.hero, ...(p.photos || [])].forEach((u) => {
-            if (!u) return;
-            const img = new Image();
-            img.decoding = 'async';
-            img.loading = 'lazy';
-            img.src = u;
-          });
+          [p.hero, ...(p.photos || [])].forEach((u) => preload(u));
         });
       });
     }
