@@ -268,19 +268,19 @@ const PROJECTS = [
    title: "Fiddler on the Roof", 
    role: "Lighting Designer", 
    year: "2019", 
-   hero: pub("fiddler/fiddler7.tif"), 
+   hero: pub("fiddler/fiddler7.jpg"), 
    blurb: "Set in the small Jewish village of Anatevka, Fiddler on the Roof follows Tevye, a poor milkman, as he struggles to balance tradition, family, and faith in a world rapidly changing around him. With humor, heart, and iconic songs, the musical celebrates love, resilience, and the ties that hold a community together.", 
    photos: [
-     pub("fiddler/fiddler1.tif"),
-     pub("fiddler/fiddler2.tif"),
-     pub("fiddler/fiddler3.tif"),
-     pub("fiddler/fiddler4.tif"),
-     pub("fiddler/fiddler5.tif"),
-     pub("fiddler/fiddler6.tif"),
-     pub("fiddler/fiddler7.tif"),
-     pub("fiddler/fiddler8.tif"),
-     pub("fiddler/fiddler9.tif"),
-     pub("fiddler/fiddler10.tif")
+     pub("fiddler/fiddler1.jpg"),
+     pub("fiddler/fiddler2.jpg"),
+     pub("fiddler/fiddler3.jpg"),
+     pub("fiddler/fiddler4.jpg"),
+     pub("fiddler/fiddler5.jpg"),
+     pub("fiddler/fiddler6.jpg"),
+     pub("fiddler/fiddler7.jpg"),
+     pub("fiddler/fiddler8.jpg"),
+     pub("fiddler/fiddler9.jpg"),
+     pub("fiddler/fiddler10.jpg")
    ], 
    captions: [
      "Perchik speaks with Tevye's daughters.",
@@ -461,6 +461,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const heroFrames = useMemo(() => PROJECTS.map(p => ({ src: p.hero, title: p.title })), []);
   const [heroIdx, setHeroIdx] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [shaderReady, setShaderReady] = useState(false);
   const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0];
   const isHttp = typeof rawHero === 'string' && rawHero.startsWith('http');
   const heroBlocked = isHttp && (rawHero.includes('imgur.com/a/') || rawHero.includes('/gallery/') || rawHero.includes('drive.google.com'));
@@ -479,22 +480,23 @@ const Hero = ({ onSeeWork, onNavigate }) => {
     return () => clearInterval(id);
   }, [paused, heroFrames.length, prefersReduced]);
 
+  useEffect(() => { setShaderReady(false); }, [hero]);
+
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
-      <>
+      {(prefersReduced || !shaderReady) && (
         <motion.img
           src={hero}
           alt="Hero background"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.0 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-full max-h-full object-contain"
+          className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
           decoding="async"
           fetchpriority="high"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
-      </>
+      )}
       {!prefersReduced && (
         <AnimatePresence initial={false}>
           <motion.div
@@ -505,10 +507,11 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2, ease: "easeInOut" }}
           >
-            <ParticleHero imageUrl={hero} />
+            <ParticleHero imageUrl={hero} onReady={() => setShaderReady(true)} onError={() => setShaderReady(false)} />
           </motion.div>
         </AnimatePresence>
       )}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }} className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-28 md:pt-40">
         <h1 className="tracking-tight" style={{ fontFamily: '"Fraunces", serif', fontSize: 'clamp(2.4rem,7vw,5.5rem)' }}>{ABOUT.headline}</h1>
         <div className="mt-2 text-white/80" style={{ fontSize: 'clamp(1rem,2.2vw,1.25rem)' }}>Featured: {currentTitle}</div>
@@ -535,7 +538,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   );
 };
 
-const ParticleHero = ({ imageUrl }) => {
+const ParticleHero = ({ imageUrl, onReady, onError }) => {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
   const animRef = useRef(null);
@@ -546,6 +549,7 @@ const ParticleHero = ({ imageUrl }) => {
     if (!container) return;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x000000, 1);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(container.clientWidth, container.clientHeight, true);
     Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' });
@@ -567,22 +571,21 @@ const ParticleHero = ({ imageUrl }) => {
       uniform float u_time;
       uniform vec2 u_mouse;
       uniform float u_brush;
-            vec2 containUv(vec2 uv, vec2 iRes, vec2 tRes){
+      vec2 coverUv(vec2 uv, vec2 iRes, vec2 tRes){
         float r = iRes.x / iRes.y;
         float tr = tRes.x / tRes.y;
         if(r > tr){
-          uv.x = (uv.x - 0.5) * (tr / r) + 0.5;
-        } else {
           uv.y = (uv.y - 0.5) * (r / tr) + 0.5;
-
+        } else {
+          uv.x = (uv.x - 0.5) * (tr / r) + 0.5;
         }
         return uv;
       }
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
       void main(){
         vec2 uv = vUv;
-        vec2 texUV = containUv(uv, u_res, u_texRes);
-        if(any(lessThan(texUV, vec2(0.0))) || any(greaterThan(texUV, vec2(1.0)))){ gl_FragColor = vec4(0.0); return; }
+        vec2 texUV = coverUv(uv, u_res, u_texRes);
+        texUV = clamp(texUV, 0.0, 1.0);
         vec3 base = texture2D(u_tex, texUV).rgb;
         vec2 mousePos = u_mouse;
         vec2 asp = vec2(u_res.x / u_res.y, 1.0);
@@ -650,12 +653,34 @@ const ParticleHero = ({ imageUrl }) => {
     loader.setCrossOrigin('anonymous');
     loader.load(
       imageUrl,
-      (tex) => { tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); renderer.render(scene, camera); },
+      (tex) => {
+        tex.generateMipmaps = true;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        uniforms.u_tex.value = tex;
+        const iw = tex.image.naturalWidth || tex.image.width;
+        const ih = tex.image.naturalHeight || tex.image.height;
+        uniforms.u_texRes.value = new THREE.Vector2(iw, ih);
+        renderer.render(scene, camera);
+        onReady?.();
+      },
       undefined,
-      () => {
+      (err) => {
+        onError?.(err);
         const fallback = PROJECTS[0]?.photos?.[0];
         if (fallback) {
-          loader.load(fallback, (tex)=>{ tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); uniforms.u_tex.value = tex; uniforms.u_texRes.value = new THREE.Vector2(tex.image.width, tex.image.height); });
+          loader.load(fallback, (tex)=>{
+            tex.generateMipmaps = true;
+            tex.minFilter = THREE.LinearMipmapLinearFilter;
+            tex.magFilter = THREE.LinearFilter;
+            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            uniforms.u_tex.value = tex;
+            const iw = tex.image.naturalWidth || tex.image.width;
+            const ih = tex.image.naturalHeight || tex.image.height;
+            uniforms.u_texRes.value = new THREE.Vector2(iw, ih);
+            onReady?.();
+          });
         }
       }
     );
@@ -703,7 +728,7 @@ const ParticleHero = ({ imageUrl }) => {
       mat.dispose();
       (uniforms.u_tex.value)?.dispose?.();
     };
-  }, [imageUrl]);
+  }, [imageUrl, onReady, onError]);
 
   return <div ref={containerRef} className="absolute inset-0" />;
 };
@@ -715,7 +740,7 @@ const ProjectCard = ({ project }) => {
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
-      <div className="md:col-span-8 overflow-hidden group relative bg-black" style={{ aspectRatio: ratio }}>
+      <div className="md:col-span-8 overflow-hidden group relative bg-black" style={{ aspectRatio: (Number.isFinite(ratio) && ratio > 0) ? ratio : (16/9) }}>
         {visible && (
           <motion.img
             initial={{opacity:0, scale:1.02}}
