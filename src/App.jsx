@@ -492,7 +492,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.0 }}
           className="absolute inset-0 w-full h-full"
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          style={{ objectFit: 'contain', objectPosition: 'center' }}
           loading="eager"
           decoding="async"
           fetchpriority="high"
@@ -576,9 +576,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         float r = iRes.x / iRes.y;
         float tr = tRes.x / tRes.y;
         if(r > tr){
-          uv.y = (uv.y - 0.5) * (r / tr) + 0.5;
-        } else {
           uv.x = (uv.x - 0.5) * (tr / r) + 0.5;
+        } else {
+          uv.y = (uv.y - 0.5) * (r / tr) + 0.5;
         }
         return uv;
       }
