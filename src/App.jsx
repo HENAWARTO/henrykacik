@@ -498,20 +498,25 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           fetchpriority="high"
         />
       )}
-      {!prefersReduced && (
-        <AnimatePresence initial={false}>
-          <motion.div
-            key={heroIdx}
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
-          >
-            <ParticleHero imageUrl={hero} onReady={() => setShaderReady(true)} onError={() => setShaderReady(false)} />
-          </motion.div>
-        </AnimatePresence>
-      )}
+       {!prefersReduced && (
+   <AnimatePresence initial={false}>
+     <motion.div
+       key={`${heroIdx}-${shaderReady ? 'ready' : 'loading'}`}
+       className="absolute inset-0"
+       initial={{ opacity: 0 }}
+       animate={{ opacity: shaderReady ? 1 : 0 }}
+       exit={{ opacity: 0 }}
+       transition={{ duration: 1.2, ease: "easeInOut" }}
+       style={{ pointerEvents: 'none' }}   // let clicks hit the buttons below
+     >
+       <ParticleHero
+         imageUrl={hero}
+         onReady={() => setShaderReady(true)}
+         onError={() => setShaderReady(false)}
+       />
+     </motion.div>
+   </AnimatePresence>
+ )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }} className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-28 md:pt-40">
         <h1 className="tracking-tight" style={{ fontFamily: '"Fraunces", serif', fontSize: 'clamp(2.4rem,7vw,5.5rem)' }}>{ABOUT.headline}</h1>
@@ -548,9 +553,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setClearColor(0x000000, 1);
+    renderer.setClearColor(0x000000, 0); // transparent while loading
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(container.clientWidth, container.clientHeight, true);
     Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' });
@@ -675,6 +680,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         uniforms.u_texRes.value = new THREE.Vector2(iw, ih);
         renderer.render(scene, camera);
         onReady?.();
+        tick();
       },
       undefined,
       (err) => {
@@ -693,6 +699,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
             const ih = tex.image.naturalHeight || tex.image.height;
             uniforms.u_texRes.value = new THREE.Vector2(iw, ih);
             onReady?.();
+            tick();
           });
         }
       }
@@ -723,9 +730,13 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
     window.addEventListener('pointerdown', onPointer, { passive: true });
     window.addEventListener('pointerleave', onLeave);
 
-    const start = performance.now();
-    const tick = () => { uniforms.u_time.value = (performance.now() - start) / 1000; const DECAY = 0.97, RISE = 0.985; mouseRef.current.target = Math.max(0, mouseRef.current.target * DECAY); const b = mouseRef.current.brush, tgt = mouseRef.current.target; mouseRef.current.brush = b < tgt ? tgt - (tgt - b) * RISE : tgt + (b - tgt) * DECAY; uniforms.u_brush.value = mouseRef.current.brush; renderer.render(scene, camera); animRef.current = requestAnimationFrame(tick); };
-    tick();
+    let start;
+    const tick = () => {
+    if (!start) start = performance.now();
+    uniforms.u_time.value = (performance.now() - start) / 1000;
+     // ... (same body)
+    animRef.current = requestAnimationFrame(tick);
+     };
 
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
