@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import * as THREE from 'three';
+
 
 const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
 
@@ -467,8 +467,6 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const currentTitle = heroFrames[heroIdx]?.title || PROJECTS[0]?.title;
   const currentProject = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[heroIdx] || PROJECTS[0];
   const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const isSmallScreen = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 768px)').matches;
-  const [phase] = useState((prefersReduced || isSmallScreen) ? 'fallback' : 'particles');
 
   useEffect(() => { const preload = (u) => { const img = new Image(); img.decoding='async'; img.loading='eager'; img.src=u; }; preload(hero); const nextIdx = (heroIdx + 1) % heroFrames.length; if (heroFrames[nextIdx]) preload(heroFrames[nextIdx].src); }, [hero, heroIdx, heroFrames]);
 
@@ -482,33 +480,31 @@ const Hero = ({ onSeeWork, onNavigate }) => {
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
-      {phase === 'fallback' && (
-        <>
-   <style>
-            {`@keyframes kenburnsA { 0%{transform:scale(1) translate3d(0,0,0)} 100%{transform:scale(1.08) translate3d(2%, -2%, 0)} }
-              @keyframes kenburnsB { 0%{transform:scale(1.05) translate3d(0,0,0)} 100%{transform:scale(1.1) translate3d(-2%, 2%, 0)} }`}
-          </style>
-          <motion.img
-            src={hero}
-            alt="Hero background"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.0 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-auto h-auto max-w-full max-h-full object-contain"
-            style={{ animation: 'kenburnsA 18s ease-out forwards' }}
-          />
-          <motion.img
-            src={hero}
-            alt="Hero overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.35 }}
-            transition={{ duration: 2.4, delay: 0.6 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-auto h-auto max-w-full max-h-full object-contain mix-blend-screen"
-            style={{ animation: 'kenburnsB 22s ease-out forwards' }}
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
-        </>
-      )}
+      <>
+        <style>
+          {`@keyframes kenburnsA { 0%{transform:scale(1) translate3d(0,0,0)} 100%{transform:scale(1.08) translate3d(2%, -2%, 0)} }
+            @keyframes kenburnsB { 0%{transform:scale(1.05) translate3d(0,0,0)} 100%{transform:scale(1.1) translate3d(-2%, 2%, 0)} }`}
+        </style>
+        <motion.img
+          src={hero}
+          alt="Hero background"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.0 }}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ animation: 'kenburnsA 18s ease-out forwards' }}
+        />
+        <motion.img
+          src={hero}
+          alt="Hero overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.35 }}
+          transition={{ duration: 2.4, delay: 0.6 }}
+          className="absolute inset-0 w-full h-full object-cover mix-blend-screen"
+          style={{ animation: 'kenburnsB 22s ease-out forwards' }}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+      </>
       {phase === 'particles' && (
         <AnimatePresence initial={false}>
           <motion.div key={heroIdx} className="absolute inset-0" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:1.2, ease:"easeInOut"}}>
