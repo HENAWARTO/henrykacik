@@ -516,7 +516,8 @@ const Hero = ({ onSeeWork, onNavigate }) => {
        />
      </motion.div>
   </AnimatePresence>
- )}
+)}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_70%,black_100%)]" />
       <div
         className="pointer-events-none absolute inset-0"
         style={{ background: 'radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.85) 90%, black 100%)' }}
@@ -814,6 +815,7 @@ const ProjectCard = ({ project }) => {
         }}
       />
     )}
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_70%,black_100%)]" />
        <button
           onClick={open}
           className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition"
@@ -886,6 +888,7 @@ const Portfolio = () => {
                     />
                   )}
                 </AnimatePresence>
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_70%,black_100%)]" />
               </motion.div>
               <LightboxDetails active={active} idx={idx} />
               <div className="mt-3 flex items-center justify-between text-white/80">
@@ -905,7 +908,7 @@ const About = ({ onNavigate }) => (
     <SectionTitle>About</SectionTitle>
     <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-8 items-center">
       <div className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <img src={ABOUT.photo} className="w-full h-auto block" loading="eager" decoding="async" fetchpriority="high" sizes="(min-width: 768px) 40vw, 90vw"/>
+        <img src={ABOUT.photo} alt="Headshot of Henry Kacik" className="w-full h-auto block" loading="eager" decoding="async" fetchpriority="high" sizes="(min-width: 768px) 40vw, 90vw"/>
       </div>
       <div className="md:col-span-7">
         <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>{ABOUT.headline}</h3>
