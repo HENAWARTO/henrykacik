@@ -785,7 +785,7 @@ const Portfolio = () => {
       <AnimatePresence>
         {active && (
           <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 bg-black/95 p-2 sm:p-4 overflow-y-auto flex justify-center">
-            <div className="w-screen max-w-6xl">
+            <div className="max-w-6xl mx-auto">
               <div className="sticky top-0 z-10 mb-3 flex items-center justify-between text-white bg-black/95 pb-3">
                 <div className="max-w-[70%]">
                   <div className="text-xs uppercase tracking-[0.2em] opacity-80">{active.role} — {active.year}</div>
@@ -797,7 +797,7 @@ const Portfolio = () => {
                   <button onClick={close} className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
                 </div>
               </div>
-              <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative grid place-items-center bg-black" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
+              <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative inline-grid place-items-center bg-black w-fit mx-auto" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
                 {!imgLoaded && (
                   <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
                 )}
