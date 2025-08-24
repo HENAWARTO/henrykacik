@@ -494,7 +494,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.0 }}
-            className="absolute inset-0 h-full w-full object-contain object-center"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-auto h-auto max-w-full max-h-full object-contain"
             style={{ animation: 'kenburnsA 18s ease-out forwards' }}
           />
           <motion.img
@@ -503,7 +503,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.35 }}
             transition={{ duration: 2.4, delay: 0.6 }}
-            className="absolute inset-0 h-full w-full object-contain object-center mix-blend-screen"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-auto h-auto max-w-full max-h-full object-contain mix-blend-screen"
             style={{ animation: 'kenburnsB 22s ease-out forwards' }}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
