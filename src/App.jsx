@@ -492,7 +492,10 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.0 }}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
           style={{ animation: 'kenburnsA 18s ease-out forwards' }}
         />
         <motion.img
@@ -501,7 +504,10 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.35 }}
           transition={{ duration: 2.4, delay: 0.6 }}
-          className="absolute inset-0 w-full h-full object-cover mix-blend-screen"
+          className="absolute inset-0 w-full h-full object-contain mix-blend-screen"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
           style={{ animation: 'kenburnsB 22s ease-out forwards' }}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
@@ -675,19 +681,45 @@ const ParticleHero = ({ imageUrl }) => {
     onResize();
     window.addEventListener('resize', onResize);
 
-    const onPointer = (e) => { const rect = container.getBoundingClientRect(); const x = (e.clientX - rect.left) / rect.width; const y = 1.0 - (e.clientY - rect.top) / rect.height; uniforms.u_mouse.value.set(x, y); mouseRef.current.target = Math.min(1, mouseRef.current.target + 0.08); };
+    const onPointer = (e) => {
+      const rect = container.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      if (inside) {
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = 1.0 - (e.clientY - rect.top) / rect.height;
+        uniforms.u_mouse.value.set(x, y);
+        mouseRef.current.target = Math.min(1, mouseRef.current.target + 0.08);
+      } else {
+        mouseRef.current.target = 0;
+      }
+    };
     const onLeave = () => { mouseRef.current.target = 0; };
-    renderer.domElement.addEventListener('pointermove', onPointer, { passive: true });
-    renderer.domElement.addEventListener('pointerdown', onPointer, { passive: true });
-    renderer.domElement.addEventListener('pointerleave', onLeave, { passive: true });
+    window.addEventListener('pointermove', onPointer, { passive: true });
+    window.addEventListener('pointerdown', onPointer, { passive: true });
+    window.addEventListener('pointerleave', onLeave);
 
     const start = performance.now();
     const tick = () => { uniforms.u_time.value = (performance.now() - start) / 1000; const DECAY = 0.97, RISE = 0.985; mouseRef.current.target = Math.max(0, mouseRef.current.target * DECAY); const b = mouseRef.current.brush, tgt = mouseRef.current.target; mouseRef.current.brush = b < tgt ? tgt - (tgt - b) * RISE : tgt + (b - tgt) * DECAY; uniforms.u_brush.value = mouseRef.current.brush; renderer.render(scene, camera); animRef.current = requestAnimationFrame(tick); };
     tick();
 
-    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); window.removeEventListener('resize', onResize); renderer.domElement.removeEventListener('pointermove', onPointer);
-    renderer.domElement.removeEventListener('pointerdown', onPointer);
-    renderer.domElement.removeEventListener('pointerleave', onLeave); if (rendererRef.current) { rendererRef.current.dispose(); container.removeChild(rendererRef.current.domElement); rendererRef.current = null; } mat.dispose(); (uniforms.u_tex.value)?.dispose?.(); };
+    return () => {
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('pointermove', onPointer);
+      window.removeEventListener('pointerdown', onPointer);
+      window.removeEventListener('pointerleave', onLeave);
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        container.removeChild(rendererRef.current.domElement);
+        rendererRef.current = null;
+      }
+      mat.dispose();
+      (uniforms.u_tex.value)?.dispose?.();
+    };
   }, [imageUrl]);
 
   return <div ref={containerRef} className="absolute inset-0" />;
@@ -696,10 +728,11 @@ const ParticleHero = ({ imageUrl }) => {
 const ProjectCard = ({ project }) => {
   const opts = useMemo(() => ({ threshold: 0.2 }), []);
   const [ref, visible] = useLazyLoad(opts);
+  const [ratio, setRatio] = useState(16/9);
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
-      <div className="md:col-span-8 overflow-hidden group relative bg-black">
+      <div className="md:col-span-8 overflow-hidden group relative bg-black" style={{ aspectRatio: ratio }}>
         {visible && (
           <motion.img
             initial={{opacity:0, scale:1.02}}
@@ -707,11 +740,12 @@ const ProjectCard = ({ project }) => {
             transition={{duration:0.7, ease:'easeOut'}}
             src={project.hero}
             alt={project.title}
-            className="w-full h-auto object-contain object-center transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-contain object-center transform-gpu will-change-transform transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
             decoding="async"
             fetchpriority="low"
             sizes="(min-width: 1024px) 66vw, 100vw"
+            onLoad={(e)=>setRatio(e.target.naturalWidth / e.target.naturalHeight)}
           />
         )}
        <button
@@ -851,6 +885,21 @@ export default function HenryKacikSite() {
   const [cueNumber, setCueNumber] = useState(1);
   const [renderRoute, setRenderRoute] = useState(route);
   useEffect(() => { injectFonts(); }, []);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        PROJECTS.forEach(p => {
+          [p.hero, ...(p.photos || [])].forEach((u) => {
+            if (!u) return;
+            const img = new Image();
+            img.decoding = 'async';
+            img.loading = 'lazy';
+            img.src = u;
+          });
+        });
+      });
+    }
+  }, []);
   const go = useCallback((r) => { if (window.location.hash.slice(1) === r) return; if (lxMode) { setPreFade(true); setRenderRoute(route); setTimeout(() => { window.location.hash = r; }, 700); } else { setPreFade(false); window.location.hash = r; } }, [route, lxMode]);
   useEffect(() => { if (lxMode) { setCueNumber(cueRef.current); const t0 = setTimeout(() => setShowCue(true), 40); const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(route); }, 40 + 1600); const t2 = setTimeout(() => setPreFade(false), 40 + 1600 + 100); cueRef.current = cueRef.current + 1; return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); }; } else { setShowCue(false); setPreFade(false); setRenderRoute(route); } }, [route]);
   const onSeeWork = useCallback(() => go("portfolio"), [go]);
