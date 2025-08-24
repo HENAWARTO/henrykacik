@@ -471,6 +471,9 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   const coarsePointer = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches;
 
+  const handleShaderReady = useCallback(() => setShaderReady(true), []);
+  const handleShaderError = useCallback(() => setShaderReady(false), []);
+
   useEffect(() => { const preload = (u) => { const img = new Image(); img.decoding='async'; img.loading='eager'; img.src=u; }; preload(hero); const nextIdx = (heroIdx + 1) % heroFrames.length; if (heroFrames[nextIdx]) preload(heroFrames[nextIdx].src); }, [hero, heroIdx, heroFrames]);
 
   useEffect(() => { if (!hero) return; const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image'; link.href = hero; document.head.appendChild(link); return () => { try { document.head.removeChild(link); } catch(e){} }; }, [hero]);
@@ -511,8 +514,8 @@ const Hero = ({ onSeeWork, onNavigate }) => {
      >
        <ParticleHero
          imageUrl={hero}
-         onReady={() => setShaderReady(true)}
-         onError={() => setShaderReady(false)}
+         onReady={handleShaderReady}
+         onError={handleShaderError}
        />
      </motion.div>
   </AnimatePresence>
