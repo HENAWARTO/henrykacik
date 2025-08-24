@@ -792,7 +792,7 @@ const ProjectCard = ({ project }) => {
       style={{ objectFit: 'contain', objectPosition: 'center' }}
       loading="lazy"
       decoding="async"
-      fetchpriority="low"
+        fetchpriority="high"
       sizes="(min-width: 1024px) 66vw, 100vw"
       onLoad={(e) => {
         const w = e.target.naturalWidth || 16;
