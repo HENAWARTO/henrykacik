@@ -550,6 +550,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
   const rendererRef = useRef(null);
   const animRef = useRef(null);
   const mouseRef = useRef({ brush: 0, target: 0 });
+  const inViewRef = useRef(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -566,6 +567,11 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     const geom = new THREE.PlaneGeometry(2, 2);
+
+    const observer = new IntersectionObserver(([entry]) => {
+      inViewRef.current = entry.isIntersecting;
+    });
+    observer.observe(container);
 
     const vertexShader = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position,1.0); }`;
 
@@ -743,11 +749,13 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
     let start;
     const tick = () => {
       if (!start) start = performance.now();
-      uniforms.u_time.value = (performance.now() - start) / 1000;
-      const m = mouseRef.current;
-      m.brush += (m.target - m.brush) * 0.1;
-      uniforms.u_brush.value = m.brush;
-      renderer.render(scene, camera);
+      if (inViewRef.current) {
+        uniforms.u_time.value = (performance.now() - start) / 1000;
+        const m = mouseRef.current;
+        m.brush += (m.target - m.brush) * 0.1;
+        uniforms.u_brush.value = m.brush;
+        renderer.render(scene, camera);
+      }
       animRef.current = requestAnimationFrame(tick);
     };
 
@@ -757,6 +765,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('pointerdown', onPointer);
       window.removeEventListener('pointerleave', onLeave);
+      observer.disconnect();
       if (resizeRaf) cancelAnimationFrame(resizeRaf);
       if (rendererRef.current) {
         rendererRef.current.dispose();
