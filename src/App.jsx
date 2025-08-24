@@ -581,9 +581,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         float r = iRes.x / iRes.y;
         float tr = tRes.x / tRes.y;
         if(r > tr){
-          uv.x = (uv.x - 0.5) * (tr / r) + 0.5;
+          uv.x = (uv.x - 0.5) * (r / tr) + 0.5;
         } else {
-          uv.y = (uv.y - 0.5) * (r / tr) + 0.5;
+          uv.y = (uv.y - 0.5) * (tr / r) + 0.5;
         }
         return uv;
       }
@@ -705,7 +705,16 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
       }
     );
 
-    const onResize = () => { const w = container.clientWidth, h = container.clientHeight; renderer.setSize(w, h, true); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); uniforms.u_res.value.set(w, h); };
+    let resizeRaf;
+    const onResize = () => {
+      if (resizeRaf) cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(() => {
+        const w = container.clientWidth, h = container.clientHeight;
+        renderer.setSize(w, h, true);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        uniforms.u_res.value.set(w, h);
+      });
+    };
     onResize();
     window.addEventListener('resize', onResize);
 
@@ -732,11 +741,14 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
 
     let start;
     const tick = () => {
-    if (!start) start = performance.now();
-    uniforms.u_time.value = (performance.now() - start) / 1000;
-     // ... (same body)
-    animRef.current = requestAnimationFrame(tick);
-     };
+      if (!start) start = performance.now();
+      uniforms.u_time.value = (performance.now() - start) / 1000;
+      const m = mouseRef.current;
+      m.brush += (m.target - m.brush) * 0.1;
+      uniforms.u_brush.value = m.brush;
+      renderer.render(scene, camera);
+      animRef.current = requestAnimationFrame(tick);
+    };
 
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
@@ -744,6 +756,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('pointerdown', onPointer);
       window.removeEventListener('pointerleave', onLeave);
+      if (resizeRaf) cancelAnimationFrame(resizeRaf);
       if (rendererRef.current) {
         rendererRef.current.dispose();
         container.removeChild(rendererRef.current.domElement);
