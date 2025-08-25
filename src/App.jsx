@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import * as THREE from "three";
 
 
 const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
@@ -424,25 +423,34 @@ const LightboxDetails = ({ active, idx }) => {
             className="overflow-hidden w-full"
           >
             {active.captions && active.captions[idx] && (
-              <div className="mt-3 text-sm">{active.captions[idx]}</div>
+              <div className="mt-3 text-sm" aria-live="polite">{active.captions[idx]}</div>
             )}
             {active.credits && active.credits.length > 0 && (
               <div className="mt-3 overflow-hidden w-full">
                 <style>
                   {`@keyframes marquee { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}
                 </style>
-                <div
-                  className="flex gap-6 py-2 whitespace-nowrap"
-                  style={{ animation: 'marquee 18s linear infinite' }}
-                >
-                  {[...active.credits, ...active.credits].map((c, i) => (
-                    <span
-                      key={i}
-                      className="text-xs uppercase tracking-widest opacity-80"
-                    >
-                      {c}
-                    </span>
-                  ))}
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex gap-6 py-2 whitespace-nowrap"
+                    style={{ animation: 'marquee 18s linear infinite' }}
+                  >
+                    {[...active.credits, ...active.credits].map((c, i) => (
+                      <span
+                        key={i}
+                        className="text-xs uppercase tracking-widest opacity-80"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => navigator.clipboard?.writeText(active.credits.join(' · '))}
+                    className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1"
+                    title="Copy credits"
+                  >
+                    Copy
+                  </button>
                 </div>
               </div>
             )}
@@ -456,13 +464,17 @@ const LightboxDetails = ({ active, idx }) => {
 const Nav = ({ route, onNav, lxMode, setLxMode }) => {
   const items = ["home","about","portfolio","resume","contact"];
   return (
-    <nav className="fixed top-0 left-0 z-50 flex w-full justify-between pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+    <nav
+  aria-label="Main"
+  className="fixed top-0 left-0 z-50 flex w-full justify-between pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]"
+>
       <span className="text-2xl text-white mix-blend-difference" style={{ fontFamily: 'Fraunces, serif' }}>Henry Kacik</span>
       <div className="flex gap-4 overflow-x-auto whitespace-nowrap">
         {items.map(it => (
           <button
             key={it}
             onClick={() => onNav(it)}
+            aria-current={route === it ? "page" : undefined}
             className={`uppercase tracking-widest text-sm ${route === it ? "underline" : ''} text-white mix-blend-difference`}
           >
             {it}
@@ -486,6 +498,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const [heroIdx, setHeroIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [shaderReady, setShaderReady] = useState(false);
+  const [scrolling, setScrolling] = useState(true);
   const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0];
   const isHttp = typeof rawHero === 'string' && rawHero.startsWith('http');
   const heroBlocked = isHttp && (rawHero.includes('imgur.com/a/') || rawHero.includes('/gallery/') || rawHero.includes('drive.google.com'));
@@ -560,18 +573,40 @@ const Hero = ({ onSeeWork, onNavigate }) => {
         <p className="mt-4 max-w-2xl text-white/85">Design that breathes with the score. Shadow, glow, and a little chaos—on purpose.</p>
         <div className="mt-6 flex flex-wrap gap-3 items-center">
           <button onClick={onSeeWork} className="border border-white px-6 py-3 font-mono uppercase tracking-widest hover:bg-white hover:text-black transition">See Portfolio</button>
-          <button onClick={() => { const it = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[0]; try { sessionStorage.setItem('openGalleryId', it.id); } catch(e){} onNavigate('portfolio'); }} className="border border-white/40 px-6 py-3 font-mono uppercase tracking-widest hover:bg-white/10 transition">Open This Project</button>
+          <button
+            onClick={() => {
+              const it = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[0];
+              window.location.hash = `portfolio/${it.id}`;
+              onNavigate('portfolio');
+            }}
+            className="border border-white/40 px-6 py-3 font-mono uppercase tracking-widest hover:bg-white/10 transition"
+          >
+            Open This Project
+          </button>
           <div className="ml-2 flex gap-2">
             {heroFrames.map((_,i)=> (<button key={i} onClick={()=>setHeroIdx(i)} aria-label={`Show ${i+1}`} className={`h-2 w-2 rounded-full ${i===heroIdx? 'bg-white' : 'bg-white/40 hover:bg-white/70'} transition`} />))}
           </div>
         </div>
         <div className="mt-2 text-xs opacity-70">Toggle the icon in the top-right: play = theatrical transitions, stop = smooth fades.</div>
         {currentProject?.credits && currentProject.credits.length>0 && (
-          <div className="mt-4 overflow-hidden">
+          <div className="mt-4 overflow-hidden flex items-center gap-3">
             <style>{`@keyframes marqueeH { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
-            <div className="flex gap-6 whitespace-nowrap opacity-70 text-xs" style={{ animation: 'marqueeH 22s linear infinite' }}>
-              {[...currentProject.credits, ...currentProject.credits].map((c, i)=> (<span key={i} className="uppercase tracking-widest">{c}</span>))}
+            <div
+              className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
+              style={{ animation: (scrolling ? 'marqueeH 22s linear infinite' : 'none') }}
+            >
+              {[...currentProject.credits, ...currentProject.credits].map((c, i)=> (
+                <span key={i} className="uppercase tracking-widest">{c}</span>
+              ))}
             </div>
+            <button
+              onClick={() => setScrolling(s => !s)}
+              className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
+              aria-pressed={!scrolling}
+              title={scrolling ? 'Pause credits' : 'Play credits'}
+            >
+              {scrolling ? 'Pause' : 'Play'}
+            </button>
           </div>
         )}
       </motion.div>
@@ -587,148 +622,178 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
   const inViewRef = useRef(true);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setClearColor(0x000000, 0); // transparent while loading
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight, true);
-    Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' });
-    rendererRef.current = renderer;
-    container.appendChild(renderer.domElement);
+    let cancelled = false;
+    let cleanup = () => {};
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const geom = new THREE.PlaneGeometry(2, 2);
+    (async () => {
+      try {
+        // Capability gating
+        const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+        const coarsePointer  = window.matchMedia?.('(pointer: coarse)')?.matches;
+        const cores = navigator.hardwareConcurrency || 4;
+        const memoryOK = (navigator.deviceMemory || 4) >= 4;
+        const enableFx = !prefersReduced && !coarsePointer && cores >= 6 && memoryOK;
+        if (!enableFx) { onError?.(); return; }
 
-    const observer = new IntersectionObserver(([entry]) => {
-      inViewRef.current = entry.isIntersecting;
-    });
-    observer.observe(container);
+        const THREE = await import('three');
+        if (cancelled) return;
 
-    const vertexShader = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position,1.0); }`;
+        const container = containerRef.current;
+        if (!container) return;
 
-    const fragmentShader = `
-      precision highp float;
-      varying vec2 vUv;
-      uniform sampler2D u_tex;
-      uniform vec2 u_res;
-      uniform vec2 u_texRes;
-      uniform float u_time;
-      uniform vec2 u_mouse;
-      uniform float u_brush;
-      vec2 coverUv(vec2 uv, vec2 iRes, vec2 tRes){
-        float r = iRes.x / iRes.y;
-        float tr = tRes.x / tRes.y;
-        if(r > tr){
-          uv.x = (uv.x - 0.5) * (r / tr) + 0.5;
-        } else {
-          uv.y = (uv.y - 0.5) * (tr / r) + 0.5;
-        }
-        return uv;
-      }
-      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
-      vec3 texRGB(vec2 uv){ return texture2D(u_tex, clamp(uv, 0.0, 1.0)).rgb; }
-      float edgeDist(vec2 uv){ vec2 d = min(uv, 1.0 - uv); return min(d.x, d.y); }
-      void main(){
-        vec2 uv = vUv;
-        vec2 texUV = coverUv(uv, u_res, u_texRes);
-        texUV = clamp(texUV, 0.0, 1.0);
-        vec3 base = texRGB(texUV);
-        vec2 mousePos = u_mouse;
-        vec2 asp = vec2(u_res.x / u_res.y, 1.0);
-        vec2 rel = (uv - mousePos) * asp;
-        rel *= vec2(1.9, 1.6);
-        float r = length(rel);
-        float ang = atan(rel.y, rel.x);
-        float angNoise = 0.04 * sin(ang * 6.0 + u_time * 0.5) + 0.02 * sin(ang * 13.0 - u_time * 0.3);
-        float rMod = r * (1.0 + angNoise * 0.5);
-        float raw = 1.0 - smoothstep(0.06, 0.34, rMod);
-        float x = clamp(raw, 0.0, 1.0);
-        float spotlight = x*x*x*(x*(x*6.0 - 15.0) + 10.0);
-        float edgeNoise = mix(0.94, 1.0, hash(uv*vec2(720.0,540.0) + u_time*0.18));
-        float brushMask = clamp(spotlight * edgeNoise, 0.0, 1.0) * u_brush;
-        float baseAmt = 0.85;
-        float amt = mix(baseAmt, 0.0, brushMask);
-        ang = 0.0;
-        ang += sin(texUV.y*28.0 + u_time*0.35);
-        ang += cos(texUV.x*34.0 - u_time*0.25);
-        ang += sin((texUV.x+texUV.y)*18.0 + u_time*0.18);
-        vec2 dir = normalize(vec2(cos(ang), sin(ang)));
-        vec2 dir2 = vec2(-dir.y, dir.x);
-        float stroke = 0.0055 * max(amt, 0.15);
-        float stroke2 = 0.0032 * max(amt, 0.12);
-        float maxKernel = max(5.0 * stroke, 3.0 * stroke2);
-        float guard = smoothstep(0.0, maxKernel * 1.3, edgeDist(texUV));
-        stroke *= guard;
-        stroke2 *= guard;
-        vec3 acc = vec3(0.0); float tot = 0.0;
-        for(int i=0;i<11;i++){ float s=float(i)-5.0; float w=exp(-s*s/12.0); acc += texRGB(texUV + dir * s * stroke) * w; tot+=w; }
-        vec3 stroke1 = acc / max(tot, 1e-5);
-        vec3 acc2 = vec3(0.0); float tot2 = 0.0;
-        for(int j=0;j<7;j++){ float s2=float(j)-3.0; float w2=exp(-s2*s2/8.0); acc2 += texRGB(texUV + dir2 * s2 * stroke2) * w2; tot2+=w2; }
-        vec3 stroke2c = acc2 / max(tot2, 1e-5);
-        vec3 paint = mix(stroke1, stroke2c, 0.35);
-        float levels = mix(7.0, 18.0, brushMask);
-        paint = floor(paint * levels) / levels;
-        float invBrush = 1.0 - brushMask;
-        paint = mix(paint, vec3(paint.r*0.9 + paint.g*0.1, paint.g, paint.b*1.12), invBrush*0.65);
-        paint += invBrush * 0.07 * vec3(0.05, 0.04, 0.10);
-        float sparkle = smoothstep(0.995, 1.0, hash(texUV*vec2(800.0, 600.0) + u_time*0.02));
-        vec3 stars = vec3(sparkle) * (1.0 - brushMask) * 0.12;
-        vec2 px = 1.0 / u_texRes; float gx=0.0, gy=0.0;
-        gx += texRGB(texUV + vec2(-px.x, 0.0)).r - texRGB(texUV + vec2(px.x, 0.0)).r;
-        gy += texRGB(texUV + vec2(0.0, -px.y)).r - texRGB(texUV + vec2(0.0, px.y)).r;
-        float edge = clamp(length(vec2(gx,gy))*1.6, 0.0, 1.0);
-        paint = mix(paint, paint*1.08, edge*0.5);
-        vec3 color = mix(base, paint, amt);
-        color = mix(color, base, brushMask);
-        color += stars;
-        float vig = smoothstep(0.85, 0.2, length(uv - 0.5));
-        color *= mix(1.0, 0.94, vig*0.3);
-        gl_FragColor = vec4(color, 1.0);
-      }
-    `;
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.setClearColor(0x000000, 0);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(container.clientWidth, container.clientHeight, true);
+        Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' });
+        rendererRef.current = renderer;
+        container.appendChild(renderer.domElement);
 
-    const uniforms = {
-      u_tex: { value: null },
-      u_res: { value: new THREE.Vector2(container.clientWidth, container.clientHeight) },
-      u_texRes: { value: new THREE.Vector2(1,1) },
-      u_time: { value: 0 },
-      u_mouse: { value: new THREE.Vector2(0.5,0.5) },
-      u_brush: { value: 0.0 },
-    };
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    const mat = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms });
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat);
-    scene.add(mesh);
+        const vertexShader = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position,1.0); }`;
+        const fragmentShader = `
+          precision highp float;
+          varying vec2 vUv;
+          uniform sampler2D u_tex;
+          uniform vec2 u_res;
+          uniform vec2 u_texRes;
+          uniform float u_time;
+          uniform vec2 u_mouse;
+          uniform float u_brush;
+          vec2 coverUv(vec2 uv, vec2 iRes, vec2 tRes){
+            float r = iRes.x / iRes.y;
+            float tr = tRes.x / tRes.y;
+            if(r > tr){ uv.x = (uv.x - 0.5) * (r / tr) + 0.5; }
+            else { uv.y = (uv.y - 0.5) * (tr / r) + 0.5; }
+            return uv;
+          }
+          float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+          vec3 texRGB(vec2 uv){ return texture2D(u_tex, clamp(uv, 0.0, 1.0)).rgb; }
+          float edgeDist(vec2 uv){ vec2 d = min(uv, 1.0 - uv); return min(d.x, d.y); }
+          void main(){
+            vec2 uv = vUv;
+            vec2 texUV = coverUv(uv, u_res, u_texRes);
+            texUV = clamp(texUV, 0.0, 1.0);
+            vec3 base = texRGB(texUV);
+            vec2 mousePos = u_mouse;
+            vec2 asp = vec2(u_res.x / u_res.y, 1.0);
+            vec2 rel = (uv - mousePos) * asp;
+            rel *= vec2(1.9, 1.6);
+            float r = length(rel);
+            float ang = atan(rel.y, rel.x);
+            float angNoise = 0.04 * sin(ang * 6.0 + u_time * 0.5) + 0.02 * sin(ang * 13.0 - u_time * 0.3);
+            float rMod = r * (1.0 + angNoise * 0.5);
+            float raw = 1.0 - smoothstep(0.06, 0.34, rMod);
+            float x = clamp(raw, 0.0, 1.0);
+            float spotlight = x*x*x*(x*(x*6.0 - 15.0) + 10.0);
+            float edgeNoise = mix(0.94, 1.0, hash(uv*vec2(720.0,540.0) + u_time*0.18));
+            float brushMask = clamp(spotlight * edgeNoise, 0.0, 1.0) * u_brush;
+            float baseAmt = 0.85;
+            float amt = mix(baseAmt, 0.0, brushMask);
+            ang = 0.0;
+            ang += sin(texUV.y*28.0 + u_time*0.35);
+            ang += cos(texUV.x*34.0 - u_time*0.25);
+            ang += sin((texUV.x+texUV.y)*18.0 + u_time*0.18);
+            vec2 dir = normalize(vec2(cos(ang), sin(ang)));
+            vec2 dir2 = vec2(-dir.y, dir.x);
+            float stroke = 0.0055 * max(amt, 0.15);
+            float stroke2 = 0.0032 * max(amt, 0.12);
+            float maxKernel = max(5.0 * stroke, 3.0 * stroke2);
+            float guard = smoothstep(0.0, maxKernel * 1.3, edgeDist(texUV));
+            stroke *= guard;
+            stroke2 *= guard;
+            vec3 acc = vec3(0.0); float tot = 0.0;
+            for(int i=0;i<11;i++){ float s=float(i)-5.0; float w=exp(-s*s/12.0); acc += texRGB(texUV + dir * s * stroke) * w; tot+=w; }
+            vec3 stroke1 = acc / max(tot, 1e-5);
+            vec3 acc2 = vec3(0.0); float tot2 = 0.0;
+            for(int j=0;j<7;j++){ float s2=float(j)-3.0; float w2=exp(-s2*s2/8.0); acc2 += texRGB(texUV + dir2 * s2 * stroke2) * w2; tot2+=w2; }
+            vec3 stroke2c = acc2 / max(tot2, 1e-5);
+            vec3 paint = mix(stroke1, stroke2c, 0.35);
+            float levels = mix(7.0, 18.0, brushMask);
+            paint = floor(paint * levels) / levels;
+            float invBrush = 1.0 - brushMask;
+            paint = mix(paint, vec3(paint.r*0.9 + paint.g*0.1, paint.g, paint.b*1.12), invBrush*0.65);
+            paint += invBrush * 0.07 * vec3(0.05, 0.04, 0.10);
+            float sparkle = smoothstep(0.995, 1.0, hash(texUV*vec2(800.0, 600.0) + u_time*0.02));
+            vec3 stars = vec3(sparkle) * (1.0 - brushMask) * 0.12;
+            vec2 px = 1.0 / u_texRes; float gx=0.0, gy=0.0;
+            gx += texRGB(texUV + vec2(-px.x, 0.0)).r - texRGB(texUV + vec2(px.x, 0.0)).r;
+            gy += texRGB(texUV + vec2(0.0, -px.y)).r - texRGB(texUV + vec2(0.0, px.y)).r;
+            float edge = clamp(length(vec2(gx,gy))*1.6, 0.0, 1.0);
+            paint = mix(paint, paint*1.08, edge*0.5);
+            vec3 color = mix(base, paint, amt);
+            color = mix(color, base, brushMask);
+            color += stars;
+            float vig = smoothstep(0.85, 0.2, length(uv - 0.5));
+            color *= mix(1.0, 0.94, vig*0.3);
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `;
 
-    const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
-    loader.load(
-      imageUrl,
-      (tex) => {
-        tex.generateMipmaps = true;
-        tex.minFilter = THREE.LinearMipmapLinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        tex.wrapS = THREE.ClampToEdgeWrapping;
-        tex.wrapT = THREE.ClampToEdgeWrapping;
-        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        uniforms.u_tex.value = tex;
-        const iw = tex.image.naturalWidth || tex.image.width;
-        const ih = tex.image.naturalHeight || tex.image.height;
-        uniforms.u_texRes.value = new THREE.Vector2(iw, ih);
-        renderer.render(scene, camera);
-        onReady?.();
-        tick();
-      },
-      undefined,
-      (err) => {
-        onError?.(err);
-        const fallback = PROJECTS[0]?.photos?.[0];
-        if (fallback) {
-          loader.load(fallback, (tex)=>{
+        const uniforms = {
+          u_tex: { value: null },
+          u_res: { value: new THREE.Vector2(container.clientWidth, container.clientHeight) },
+          u_texRes: { value: new THREE.Vector2(1,1) },
+          u_time: { value: 0 },
+          u_mouse: { value: new THREE.Vector2(0.5,0.5) },
+          u_brush: { value: 0.0 },
+        };
+
+        const mat = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms });
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat);
+        scene.add(mesh);
+
+        const observer = new IntersectionObserver(([entry]) => { inViewRef.current = entry.isIntersecting; });
+        observer.observe(container);
+
+        const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('anonymous');
+
+        const onResize = () => {
+          const w = container.clientWidth, h = container.clientHeight;
+          renderer.setSize(w, h, true);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          uniforms.u_res.value.set(w, h);
+        };
+        onResize();
+        window.addEventListener('resize', onResize);
+
+        const onPointer = (e) => {
+          const rect = container.getBoundingClientRect();
+          const inside = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+          if (inside) {
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = 1.0 - (e.clientY - rect.top) / rect.height;
+            uniforms.u_mouse.value.set(x, y);
+            mouseRef.current.target = Math.min(1, mouseRef.current.target + 0.08);
+          } else {
+            mouseRef.current.target = 0;
+          }
+        };
+        const onLeave = () => { mouseRef.current.target = 0; };
+        window.addEventListener('pointermove', onPointer, { passive: true });
+        window.addEventListener('pointerdown', onPointer, { passive: true });
+        window.addEventListener('pointerleave', onLeave);
+
+        let start;
+        const tick = () => {
+          if (!start) start = performance.now();
+          if (inViewRef.current) {
+            uniforms.u_time.value = (performance.now() - start) / 1000;
+            const m = mouseRef.current;
+            m.brush += (m.target - m.brush) * 0.1;
+            uniforms.u_brush.value = m.brush;
+            renderer.render(scene, camera);
+          }
+          animRef.current = requestAnimationFrame(tick);
+        };
+
+        loader.load(
+          imageUrl,
+          (tex) => {
             tex.generateMipmaps = true;
             tex.minFilter = THREE.LinearMipmapLinearFilter;
             tex.magFilter = THREE.LinearFilter;
@@ -741,78 +806,37 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
             uniforms.u_texRes.value = new THREE.Vector2(iw, ih);
             onReady?.();
             tick();
-          });
-        }
-      }
-    );
+          },
+          undefined,
+          (err) => { onError?.(err); }
+        );
 
-    let resizeRaf;
-    const onResize = () => {
-      if (resizeRaf) cancelAnimationFrame(resizeRaf);
-      resizeRaf = requestAnimationFrame(() => {
-        const w = container.clientWidth, h = container.clientHeight;
-        renderer.setSize(w, h, true);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        uniforms.u_res.value.set(w, h);
-      });
-    };
-    onResize();
-    window.addEventListener('resize', onResize);
-
-    const onPointer = (e) => {
-      const rect = container.getBoundingClientRect();
-      const inside =
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom;
-      if (inside) {
-        const x = (e.clientX - rect.left) / rect.width;
-        const y = 1.0 - (e.clientY - rect.top) / rect.height;
-        uniforms.u_mouse.value.set(x, y);
-        mouseRef.current.target = Math.min(1, mouseRef.current.target + 0.08);
-      } else {
-        mouseRef.current.target = 0;
+        cleanup = () => {
+          if (animRef.current) cancelAnimationFrame(animRef.current);
+          window.removeEventListener('resize', onResize);
+          window.removeEventListener('pointermove', onPointer);
+          window.removeEventListener('pointerdown', onPointer);
+          window.removeEventListener('pointerleave', onLeave);
+          observer.disconnect();
+          mat.dispose();
+          (uniforms.u_tex.value)?.dispose?.();
+          if (rendererRef.current) {
+            rendererRef.current.dispose();
+            container.removeChild(rendererRef.current.domElement);
+            rendererRef.current = null;
+          }
+        };
+      } catch (e) {
+        onError?.(e);
       }
-    };
-    const onLeave = () => { mouseRef.current.target = 0; };
-    window.addEventListener('pointermove', onPointer, { passive: true });
-    window.addEventListener('pointerdown', onPointer, { passive: true });
-    window.addEventListener('pointerleave', onLeave);
+    })();
 
-    let start;
-    const tick = () => {
-      if (!start) start = performance.now();
-      if (inViewRef.current) {
-        uniforms.u_time.value = (performance.now() - start) / 1000;
-        const m = mouseRef.current;
-        m.brush += (m.target - m.brush) * 0.1;
-        uniforms.u_brush.value = m.brush;
-        renderer.render(scene, camera);
-      }
-      animRef.current = requestAnimationFrame(tick);
-    };
-
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('pointermove', onPointer);
-      window.removeEventListener('pointerdown', onPointer);
-      window.removeEventListener('pointerleave', onLeave);
-      observer.disconnect();
-      if (resizeRaf) cancelAnimationFrame(resizeRaf);
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-        container.removeChild(rendererRef.current.domElement);
-        rendererRef.current = null;
-      }
-      mat.dispose();
-      (uniforms.u_tex.value)?.dispose?.();
-    };
+    return () => { cancelled = true; cleanup(); };
   }, [imageUrl, onReady, onError]);
 
   return <div ref={containerRef} className="absolute inset-0" />;
 };
+
 
 const ProjectCard = ({ project }) => {
   const opts = useMemo(() => ({ threshold: 0.2 }), []);
@@ -848,6 +872,7 @@ const ProjectCard = ({ project }) => {
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_70%,black_100%)]" />
        <button
           onClick={open}
+          aria-label={`Open gallery: ${project.title}`}
           className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition"
         >
           Open Gallery
@@ -870,10 +895,40 @@ const Portfolio = () => {
   const close = useCallback(() => setActive(null), []);
   const [imgLoaded, setImgLoaded] = useState(false);
   const currentSrc = active?.photos ? active.photos[idx] : null;
+  useEffect(() => {
+    const apply = () => {
+      const hash = window.location.hash.slice(1);       // e.g., "portfolio/great-comet-2024"
+      const [base, id] = hash.split('/');
+      if (base === 'portfolio' && id) {
+        const p = PROJECTS.find(p => p.id === id);
+        if (p) { setActive(p); setIdx(0); }
+      }
+    };
+    apply();
+    window.addEventListener('hashchange', apply);
+    return () => window.removeEventListener('hashchange', apply);
+  }, []);
   useEffect(()=>{ const onKey = (e)=>{ if(!active) return; if(e.key==='Escape') close(); if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); }; const onOpen = (e) => { if(e.detail){ setActive(e.detail); setIdx(0);} }; window.addEventListener('keydown', onKey); window.addEventListener('openGallery', onOpen); return ()=>{ window.removeEventListener('keydown', onKey); window.removeEventListener('openGallery', onOpen); }; },[active, close, next, prev]);
   useEffect(() => { let id = null; try { id = sessionStorage.getItem('openGalleryId'); } catch(e){} if (id) { const p = PROJECTS.find(p=>p.id===id); if (p) { setActive(p); setIdx(0); } try { sessionStorage.removeItem('openGalleryId'); } catch(e){} } }, []);
   useEffect(() => { setImgLoaded(false); }, [idx, active]);
   useEffect(() => { if (!active || !active.photos || active.photos.length < 2) return; const N = active.photos.length; const prevIdx = (idx - 1 + N) % N; const nextIdx = (idx + 1) % N; [active.photos[prevIdx], active.photos[nextIdx]].forEach((u)=>{ if(!u) return; const im = new Image(); im.decoding='async'; im.loading='eager'; im.src=u; }); }, [active, idx]);
+  useEffect(() => {
+    if (!active) return;
+    const dialog = document.querySelector('[role="dialog"]');
+    if (!dialog) return;
+    const focusable = dialog.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+    const first = focusable[0];
+    const last  = focusable[focusable.length - 1];
+
+    const onKey = (e) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKey);
+    first?.focus();
+    return () => document.removeEventListener('keydown', onKey);
+  }, [active]);
   const touch = useRef({x:0, y:0, active:false});
   const onTouchStart = (e) => { if (!e.touches?.[0]) return; touch.current = { x:e.touches[0].clientX, y:e.touches[0].clientY, active:true }; };
   const onTouchEnd = (e) => { if (!touch.current.active) return; const dx = (e.changedTouches?.[0]?.clientX ?? touch.current.x) - touch.current.x; if (Math.abs(dx) > 40) (dx < 0 ? next() : prev()); touch.current.active = false; };
@@ -882,7 +937,16 @@ const Portfolio = () => {
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
       <AnimatePresence>
         {active && (
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-50 bg-black/95 p-2 sm:p-4 overflow-y-auto flex justify-center">
+          <motion.div
+            initial={{opacity:0}}
+            animate={{opacity:1}}
+            exit={{opacity:0}}
+            className="fixed inset-0 z-50 bg-black/95 p-2 sm:p-4 overflow-y-auto flex justify-center"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${active.title} gallery`}
+            aria-keyshortcuts="ArrowLeft ArrowRight Escape"
+          >
             <div className="max-w-6xl mx-auto">
               <div className="sticky top-0 z-10 mb-3 flex items-center justify-between text-white bg-black/95 pb-3">
                 <div className="max-w-[70%]">
@@ -890,9 +954,9 @@ const Portfolio = () => {
                   <div className="text-lg font-semibold">{active.title}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={prev} className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronLeft className="h-4 w-4"/></button>
-                  <button onClick={next} className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronRight className="h-4 w-4"/></button>
-                  <button onClick={close} className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
+                  <button onClick={prev} title="Previous image" aria-label="Previous image" className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronLeft className="h-4 w-4"/></button>
+                  <button onClick={next} title="Next image" aria-label="Next image" className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronRight className="h-4 w-4"/></button>
+                  <button onClick={close} title="Close gallery" aria-label="Close gallery" className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
                 </div>
               </div>
               <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative inline-grid place-items-center bg-black w-fit mx-auto" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
@@ -1009,14 +1073,17 @@ export default function HenryKacikSite() {
   useEffect(() => { if (lxMode) { setCueNumber(cueRef.current); const t0 = setTimeout(() => setShowCue(true), 40); const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(route); }, 40 + 1600); const t2 = setTimeout(() => setPreFade(false), 40 + 1600 + 100); cueRef.current = cueRef.current + 1; return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); }; } else { setShowCue(false); setPreFade(false); setRenderRoute(route); } }, [route]);
   const onSeeWork = useCallback(() => go("portfolio"), [go]);
   return (
-    <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"' }}>
+    <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\"' }}>
+      <a href="#main" className="sr-only focus:not-sr-only fixed top-2 left-2 z-[1000] bg-white text-black px-3 py-2 rounded">
+  Skip to content
+</a>
       {lxMode && preFade && <PreFadeOverlay />}
       {lxMode && showCue && <CueOverlay cue={cueNumber} />}
       {(!showCue) && (
         lxMode ? (
           <motion.div initial={{opacity:0}} animate={{opacity: preFade ? 0 : 1}} transition={{ duration: 0.7, ease: 'easeInOut' }}>
             <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
-            <main key={renderRoute}>
+            <main id="main" key={renderRoute}>
               {renderRoute === "home" && <Hero onSeeWork={onSeeWork} onNavigate={go} />}
               {renderRoute === "about" && <About onNavigate={go} />}
               {renderRoute === "portfolio" && <Portfolio />}
@@ -1029,7 +1096,7 @@ export default function HenryKacikSite() {
           <AnimatePresence mode="wait">
             <motion.div key={renderRoute} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.6, ease:'easeInOut'}}>
               <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
-              <main>
+              <main id="main">
                 {renderRoute === "home" && <Hero onSeeWork={onSeeWork} onNavigate={go} />}
                 {renderRoute === "about" && <About onNavigate={go} />}
                 {renderRoute === "portfolio" && <Portfolio />}
