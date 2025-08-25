@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://henrykacik.com/sitemap.xml
