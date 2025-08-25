@@ -331,25 +331,22 @@ const RESUME_SUMMARY = [
 
 const injectFonts = () => {
   const head = document.head;
-  if(!head.querySelector('link[data-font-preconnect="gfonts"]')){
-    const pre = document.createElement('link');
-    pre.rel = 'preconnect';
-    pre.href = 'https://fonts.googleapis.com';
-    pre.setAttribute('data-font-preconnect', 'gfonts');
-    head.appendChild(pre);
+
+  if (!head.querySelector('link[data-font="fraunces"]')) {
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap';
+    l.setAttribute('data-font', 'fraunces');
+    head.appendChild(l);
   }
-  if(!head.querySelector('link[data-font-preconnect="gstatic"]')){
-    const pre = document.createElement('link');
-    pre.rel = 'preconnect';
-    pre.href = 'https://fonts.gstatic.com';
-    pre.crossOrigin = '';
-    pre.setAttribute('data-font-preconnect', 'gstatic');
-    head.appendChild(pre);
+
+  if (!head.querySelector('link[data-font="inter"]')) {
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap';
+    l.setAttribute('data-font', 'inter');
+    head.appendChild(l);
   }
-  const haveFraunces = head.querySelector('link[data-font="fraunces"]');
-  const haveInter = head.querySelector('link[data-font="inter"]');
-  if(!haveFraunces){ const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap'; l.setAttribute('data-font','fraunces'); head.appendChild(l); }
-  if(!haveInter){ const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap'; l.setAttribute('data-font','inter'); head.appendChild(l); }
 };
 
 const useDarkMode = () => {
@@ -483,6 +480,7 @@ const Nav = ({ route, onNav, lxMode, setLxMode }) => {
         <button
           onClick={() => setLxMode(!lxMode)}
           aria-label="toggle transitions"
+          aria-pressed={lxMode}
           title={lxMode ? 'LX Mode: theatrical cues on' : 'Smooth Mode: soft fades'}
           className="text-white mix-blend-difference px-2 py-1 border border-white/40 rounded-full"
         >
@@ -748,6 +746,8 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
 
         const observer = new IntersectionObserver(([entry]) => { inViewRef.current = entry.isIntersecting; });
         observer.observe(container);
+        const onVis = () => { inViewRef.current = !document.hidden; };
+        document.addEventListener('visibilitychange', onVis);
 
         const loader = new THREE.TextureLoader();
         loader.setCrossOrigin('anonymous');
@@ -817,6 +817,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
           window.removeEventListener('pointermove', onPointer);
           window.removeEventListener('pointerdown', onPointer);
           window.removeEventListener('pointerleave', onLeave);
+          document.removeEventListener('visibilitychange', onVis);
           observer.disconnect();
           mat.dispose();
           (uniforms.u_tex.value)?.dispose?.();
@@ -892,7 +893,13 @@ const Portfolio = () => {
   const [idx, setIdx] = useState(0);
   const next = useCallback(() => setIdx(i => (i+1) % (active?.photos?.length || 1)), [active]);
   const prev = useCallback(() => setIdx(i => (i-1 + (active?.photos?.length || 1)) % (active?.photos?.length || 1)), [active]);
-  const close = useCallback(() => setActive(null), []);
+  const close = useCallback(() => {
+    setActive(null);
+    const hash = window.location.hash.slice(1);
+    if (hash.startsWith('portfolio/')) {
+      window.location.hash = 'portfolio';
+    }
+  }, []);
   const [imgLoaded, setImgLoaded] = useState(false);
   const currentSrc = active?.photos ? active.photos[idx] : null;
   useEffect(() => {
@@ -911,6 +918,13 @@ const Portfolio = () => {
   useEffect(()=>{ const onKey = (e)=>{ if(!active) return; if(e.key==='Escape') close(); if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); }; const onOpen = (e) => { if(e.detail){ setActive(e.detail); setIdx(0);} }; window.addEventListener('keydown', onKey); window.addEventListener('openGallery', onOpen); return ()=>{ window.removeEventListener('keydown', onKey); window.removeEventListener('openGallery', onOpen); }; },[active, close, next, prev]);
   useEffect(() => { let id = null; try { id = sessionStorage.getItem('openGalleryId'); } catch(e){} if (id) { const p = PROJECTS.find(p=>p.id===id); if (p) { setActive(p); setIdx(0); } try { sessionStorage.removeItem('openGalleryId'); } catch(e){} } }, []);
   useEffect(() => { setImgLoaded(false); }, [idx, active]);
+  useEffect(() => {
+    if (active) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [active]);
   useEffect(() => { if (!active || !active.photos || active.photos.length < 2) return; const N = active.photos.length; const prevIdx = (idx - 1 + N) % N; const nextIdx = (idx + 1) % N; [active.photos[prevIdx], active.photos[nextIdx]].forEach((u)=>{ if(!u) return; const im = new Image(); im.decoding='async'; im.loading='eager'; im.src=u; }); }, [active, idx]);
   useEffect(() => {
     if (!active) return;
@@ -1053,21 +1067,23 @@ export default function HenryKacikSite() {
   const [renderRoute, setRenderRoute] = useState(route);
   useEffect(() => { injectFonts(); }, []);
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        const preload = (u, eager = false) => {
-          if (!u) return;
-          const img = new Image();
-          img.decoding = 'async';
-          img.loading = eager ? 'eager' : 'lazy';
-          img.src = u;
-        };
-        preload(ABOUT.photo, true);
-        PROJECTS.forEach(p => {
-          [p.hero, ...(p.photos || [])].forEach((u) => preload(u));
-        });
+    const ric = (typeof window !== 'undefined' && window.requestIdleCallback)
+      ? window.requestIdleCallback
+      : (cb) => setTimeout(cb, 200);
+
+    ric(() => {
+      const preload = (u, eager = false) => {
+        if (!u) return;
+        const img = new Image();
+        img.decoding = 'async';
+        img.loading = eager ? 'eager' : 'lazy';
+        img.src = u;
+      };
+      preload(ABOUT.photo, true);
+      PROJECTS.forEach(p => {
+        [p.hero, ...(p.photos || [])].forEach(preload);
       });
-    }
+    });
   }, []);
   const go = useCallback((r) => { if (window.location.hash.slice(1) === r) return; if (lxMode) { setPreFade(true); setRenderRoute(route); setTimeout(() => { window.location.hash = r; }, 700); } else { setPreFade(false); window.location.hash = r; } }, [route, lxMode]);
   useEffect(() => { if (lxMode) { setCueNumber(cueRef.current); const t0 = setTimeout(() => setShowCue(true), 40); const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(route); }, 40 + 1600); const t2 = setTimeout(() => setPreFade(false), 40 + 1600 + 100); cueRef.current = cueRef.current + 1; return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); }; } else { setShowCue(false); setPreFade(false); setRenderRoute(route); } }, [route]);
