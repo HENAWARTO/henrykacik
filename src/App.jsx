@@ -321,12 +321,36 @@ const PROJECTS = [
 
 const LINKS = { email: "hchkacik@gmail.com", phone: "+1 (970) 531-3977", location: "Brooklyn, NY", resumePdf: "/henry-kacik-resume.pdf" };
 
+const RESUME_SUMMARY = [
+  "Lighting & Projection Design",
+  "ETC Eos / GrandMA2",
+  "Vectorworks & Lightwright",
+  "Qlab",
+  "Adobe Creative Suite"
+];
+
 
 const injectFonts = () => {
-  const haveFraunces = document.querySelector('link[data-font="fraunces"]');
-  const haveInter = document.querySelector('link[data-font="inter"]');
-  if(!haveFraunces){ const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap'; l.setAttribute('data-font','fraunces'); document.head.appendChild(l); }
-  if(!haveInter){ const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap'; l.setAttribute('data-font','inter'); document.head.appendChild(l); }
+  const head = document.head;
+  if(!head.querySelector('link[data-font-preconnect="gfonts"]')){
+    const pre = document.createElement('link');
+    pre.rel = 'preconnect';
+    pre.href = 'https://fonts.googleapis.com';
+    pre.setAttribute('data-font-preconnect', 'gfonts');
+    head.appendChild(pre);
+  }
+  if(!head.querySelector('link[data-font-preconnect="gstatic"]')){
+    const pre = document.createElement('link');
+    pre.rel = 'preconnect';
+    pre.href = 'https://fonts.gstatic.com';
+    pre.crossOrigin = '';
+    pre.setAttribute('data-font-preconnect', 'gstatic');
+    head.appendChild(pre);
+  }
+  const haveFraunces = head.querySelector('link[data-font="fraunces"]');
+  const haveInter = head.querySelector('link[data-font="inter"]');
+  if(!haveFraunces){ const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap'; l.setAttribute('data-font','fraunces'); head.appendChild(l); }
+  if(!haveInter){ const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap'; l.setAttribute('data-font','inter'); head.appendChild(l); }
 };
 
 const useDarkMode = () => {
@@ -470,6 +494,14 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const currentProject = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[heroIdx] || PROJECTS[0];
   const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   const coarsePointer = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches;
+  const [fit, setFit] = useState('contain');
+  useEffect(() => {
+    const update = () => setFit(window.innerWidth < 520 ? 'cover' : 'contain');
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  const heroAlt = currentProject?.captions?.[0] || currentTitle;
 
   const handleShaderReady = useCallback(() => setShaderReady(true), []);
   const handleShaderError = useCallback(() => setShaderReady(false), []);
@@ -491,12 +523,12 @@ const Hero = ({ onSeeWork, onNavigate }) => {
       <motion.img
         key={hero}
         src={hero}
-        alt="Hero background"
+        alt={heroAlt}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.0 }}
         className="absolute inset-0 w-full h-full"
-        style={{ objectFit: 'contain', objectPosition: 'center' }}
+        style={{ objectFit: fit, objectPosition: 'center', maskImage: 'radial-gradient(circle at center, black 60%, transparent 90%)', WebkitMaskImage: 'radial-gradient(circle at center, black 60%, transparent 90%)' }}
         loading="eager"
         decoding="async"
         fetchpriority="high"
@@ -520,11 +552,6 @@ const Hero = ({ onSeeWork, onNavigate }) => {
      </motion.div>
   </AnimatePresence>
 )}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_70%,black_100%)]" />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: 'radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.85) 90%, black 100%)' }}
-      />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }} className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-28 md:pt-40">
         <h1 className="tracking-tight" style={{ fontFamily: '"Fraunces", serif', fontSize: 'clamp(2.4rem,7vw,5.5rem)' }}>{ABOUT.headline}</h1>
@@ -804,7 +831,7 @@ const ProjectCard = ({ project }) => {
       animate={{opacity:1, scale:1}}
       transition={{duration:0.7, ease:'easeOut'}}
       src={project.hero}
-      alt={project.title}
+      alt={project.captions?.[0] || project.title}
       className="w-full h-full"
       style={{ objectFit: 'contain', objectPosition: 'center' }}
       loading="lazy"
@@ -877,7 +904,7 @@ const Portfolio = () => {
                     <motion.img
                       key={currentSrc}
                       src={currentSrc}
-                      alt={active.title + ' ' + (idx + 1)}
+                      alt={active.captions?.[idx] || ''}
                       className="w-auto h-auto max-h-[92svh] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] object-contain"
                       style={{ objectFit: 'contain', objectPosition: 'center' }}
                       loading="eager"
@@ -929,6 +956,9 @@ const Resume = () => (
   <section className="py-24 px-6 bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white">
     <SectionTitle>Résumé</SectionTitle>
     <p className="max-w-xl mb-6">Download the full résumé for detailed credits and skills.</p>
+    <ul className="list-disc pl-6 space-y-2 mb-6">
+      {RESUME_SUMMARY.map((item,i)=>(<li key={i}>{item}</li>))}
+    </ul>
     <a href={LINKS.resumePdf} target="_blank" rel="noreferrer" className="border border-current px-6 py-3 font-mono uppercase tracking-widest hover:bg-white hover:text-black transition">Download PDF</a>
   </section>
 );
@@ -937,8 +967,8 @@ const Contact = () => (
   <section className="py-24 px-6 bg-black text-white">
     <SectionTitle>Contact</SectionTitle>
     <div className="space-y-4 text-lg">
-      <div><Mail className="inline mr-2"/>{LINKS.email}</div>
-      <div><Phone className="inline mr-2"/>{LINKS.phone}</div>
+      <div><Mail className="inline mr-2"/><a href={`mailto:${LINKS.email}`} className="underline" >{LINKS.email}</a></div>
+      <div><Phone className="inline mr-2"/><a href={`tel:${LINKS.phone.replace(/[^+\d]/g,'')}`} className="underline" >{LINKS.phone}</a></div>
       <div><MapPin className="inline mr-2"/>{LINKS.location}</div>
     </div>
   </section>
