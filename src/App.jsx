@@ -278,10 +278,10 @@ const PROJECTS = [
    title: "Fiddler on the Roof", 
    role: "Lighting Designer", 
    year: "2019", 
-   hero: pub("fiddler/fiddler7.JPG"), 
+   hero: pub("fiddler/fiddler7.jpg"), 
    blurb: "Set in the small Jewish village of Anatevka, Fiddler on the Roof follows Tevye, a poor milkman, as he struggles to balance tradition, family, and faith in a world rapidly changing around him. With humor, heart, and iconic songs, the musical celebrates love, resilience, and the ties that hold a community together.", 
    photos: [
-     pub("fiddler/fiddler1.JPG"),
+     pub("fiddler/fiddler1.jpg"),
      pub("fiddler/fiddler2.jpg"),
      pub("fiddler/fiddler3.jpg"),
      pub("fiddler/fiddler4.jpg"),
@@ -316,7 +316,7 @@ const PROJECTS = [
     photos: [
       pub("rockofages/rock1.jpg"),
       pub("rockofages/rock2.jpg"),
-      pub("rockofages/rock3.jpg"),
+      pub("rockofages/rock3.png"),
       pub("rockofages/rock4.jpg")
     ], 
     captions: [
