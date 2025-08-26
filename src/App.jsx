@@ -582,19 +582,31 @@ const HeroCredits = ({ credits }) => {
   const [expanded, setExpanded] = useState(false);
   if (!Array.isArray(credits) || credits.length === 0) return null;
   return (
-    <div className="mt-4" data-section="hero-credits">
+    <div className="mt-4 relative z-10" data-section="hero-credits">
       <style>{`@keyframes marqueeH { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
-      <div className="overflow-hidden flex items-center gap-3">
+      {/* Wrapper: marquee viewport + control group (controls must not be clipped) */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Marquee viewport only (is allowed to clip its children) */}
         <div
-          className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
-          style={{ animation: (scrolling ? 'marqueeH 40s linear infinite' : 'none') }}
+          className="relative overflow-hidden sm:flex-1 min-w-0"
+          style={{
+            maskImage: 'linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%)'
+          }}
           aria-live="off"
         >
-          {[...credits, ...credits].map((c, i) => (
-            <span key={i} className="uppercase tracking-widest">{c}</span>
-          ))}
+          <div
+            className="flex gap-6 whitespace-nowrap opacity-70 text-xs will-change-transform"
+            style={{ animation: (scrolling ? 'marqueeH 40s linear infinite' : 'none') }}
+            data-el="hero-credits-track"
+          >
+            {[...credits, ...credits].map((c, i) => (
+              <span key={i} className="uppercase tracking-widest">{c}</span>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Controls (never clipped) */}
+        <div className="shrink-0 flex items-center gap-2">
           <button
             onClick={() => setScrolling(s => !s)}
             className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-90 hover:opacity-100 transition"
@@ -727,7 +739,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           </div>
         </div>
         <div className="mt-2 text-xs opacity-70">Toggle the icon in the top-right: play = theatrical transitions, stop = smooth fades.</div>
-        {/* NEW: credits controls are now a dedicated, always-mounted block when credits exist */}
+        {/* Credits controls (always shown when credits exist) */}
         <HeroCredits credits={currentCredits} />
       </motion.div>
     </section>
