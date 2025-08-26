@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2 } from "lucide-react";
-// No top-level imports changed
+import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X } from "lucide-react";
 
 
 const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
@@ -358,6 +357,14 @@ const RESUME_SUMMARY = [
   "Qlab",
   "Adobe Creative Suite"
 ];
+
+// Small UI helpers
+const Pill = ({ children }) => (
+  <span className="inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 text-sm text-white/90">
+    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+    {children}
+  </span>
+);
 
 // Social links (used on Contact page)
 const SOCIALS = [
@@ -1189,22 +1196,123 @@ const About = ({ onNavigate }) => (
   </section>
 );
 
-const Resume = () => (
-  <section className="py-24 px-6 bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white">
-    <SectionTitle>Résumé</SectionTitle>
-    <p className="max-w-xl mb-6">Download the full résumé for detailed credits and skills.</p>
-    <ul className="list-disc pl-6 space-y-2 mb-6">
-      {RESUME_SUMMARY.map((item,i)=>(<li key={i}>{item}</li>))}
-    </ul>
-    <a
-      href={LINKS.resumePdf}
-      target="_blank"
-      rel="noreferrer"
-      onClick={() => track('resume_download', { file: LINKS.resumePdf })}
-      className="border border-current px-6 py-3 font-mono uppercase tracking-widest hover:bg-white hover:text-black transition"
-    >Download PDF</a>
-  </section>
-);
+const Resume = () => {
+  const [preview, setPreview] = useState(false);
+
+  // Close preview with Escape
+  useEffect(() => {
+    if (!preview) return;
+    const onKey = (e) => { if (e.key === 'Escape') setPreview(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [preview]);
+
+  return (
+    <section className="py-24 px-6 bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white">
+      <SectionTitle>Résumé</SectionTitle>
+      <div className="mx-auto max-w-6xl grid md:grid-cols-12 gap-8">
+        {/* Left column: intro + skills */}
+        <div className="md:col-span-7">
+          <p className="text-lg leading-relaxed opacity-90 mb-6">
+            Download the full résumé for detailed credits, skills, and experience. Available for theatre, concert, and live events.
+          </p>
+          <div className="space-y-4">
+            <h3 className="uppercase tracking-widest text-xs opacity-70">Core Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {RESUME_SUMMARY.map((item, i) => <Pill key={i}>{item}</Pill>)}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
+              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/5 p-4">
+                <div className="text-xs uppercase tracking-widest opacity-70">Based In</div>
+                <div className="text-sm mt-1">{LINKS.location}</div>
+              </div>
+              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/5 p-4">
+                <div className="text-xs uppercase tracking-widest opacity-70">Selected Shows</div>
+                <div className="text-sm mt-1">{PROJECTS.length} featured</div>
+              </div>
+              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/5 p-4">
+                <div className="text-xs uppercase tracking-widest opacity-70">Education</div>
+                <div className="text-sm mt-1">Emerson College</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right column: actions card */}
+        <div className="md:col-span-5">
+          <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-6">
+            <h3 className="text-base font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>Get the PDF</h3>
+            <p className="text-sm opacity-85 mb-4">Preview in your browser or download a copy.</p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={LINKS.resumePdf}
+                download
+                className="inline-flex items-center gap-2 border border-current px-4 py-2 font-mono text-xs uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition"
+              >
+                <FileDown className="h-4 w-4" aria-hidden />
+                Download
+              </a>
+              <button
+                onClick={() => setPreview(true)}
+                className="inline-flex items-center gap-2 border border-current/50 px-4 py-2 font-mono text-xs uppercase tracking-widest hover:bg-black/10 dark:hover:bg-white/10 transition"
+              >
+                <Eye className="h-4 w-4" aria-hidden />
+                Preview
+              </button>
+              <a
+                href={LINKS.resumePdf}
+                target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-2 border border-current/50 px-4 py-2 font-mono text-xs uppercase tracking-widest hover:bg-black/10 dark:hover:bg-white/10 transition"
+              >
+                <Printer className="h-4 w-4" aria-hidden />
+                Print
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Preview Overlay */}
+      <AnimatePresence>
+        {preview && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 p-3 sm:p-6 overflow-y-auto"
+            role="dialog" aria-modal="true" aria-label="Résumé preview"
+          >
+            <div className="max-w-5xl mx-auto">
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => setPreview(false)}
+                  className="rounded-full border border-white/30 px-3 py-1 text-white inline-flex items-center gap-2"
+                  aria-label="Close preview"
+                >
+                  <X className="h-4 w-4" />
+                  Close
+                </button>
+              </div>
+              <div className="rounded-xl overflow-hidden ring-1 ring-white/10 bg-black">
+                <object
+                  data={LINKS.resumePdf}
+                  type="application/pdf"
+                  className="w-full"
+                  style={{ height: '85svh' }}
+                >
+                  <iframe
+                    title="Résumé PDF"
+                    src={LINKS.resumePdf}
+                    className="w-full"
+                    style={{ height: '85svh' }}
+                  />
+                </object>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+};
 
 const Contact = () => (
   <section className="py-24 px-6 bg-black text-white">
