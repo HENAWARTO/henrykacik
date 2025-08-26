@@ -318,6 +318,36 @@ const PROJECTS = [
 
 ];
 
+// ---- JSON-LD ItemList for projects ----
+const injectProjectSchema = () => {
+  try {
+    const list = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Lighting Portfolio",
+      "itemListElement": PROJECTS.map((p, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "item": {
+          "@type": "CreativeWork",
+          "name": p.title,
+          "description": p.blurb,
+          "image": p.hero.startsWith('http') ? p.hero : (location.origin + (p.hero.startsWith('/') ? p.hero : '/' + p.hero)),
+          "url": `${location.origin}/#portfolio/${p.id}`,
+          "dateCreated": p.year
+        }
+      }))
+    };
+    const el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.id = 'project-schema';
+    el.textContent = JSON.stringify(list);
+    const prev = document.getElementById('project-schema');
+    if (prev) prev.remove();
+    document.head.appendChild(el);
+  } catch {}
+};
+
 const LINKS = { email: "hchkacik@gmail.com", phone: "+1 (970) 531-3977", location: "Brooklyn, NY", resumePdf: "/henry-kacik-resume.pdf" };
 
 const RESUME_SUMMARY = [
@@ -327,6 +357,11 @@ const RESUME_SUMMARY = [
   "Qlab",
   "Adobe Creative Suite"
 ];
+
+// --- Analytics helper ---
+const track = (name, params = {}) => {
+  try { window.gtag?.('event', name, { event_category: 'site', ...params }); } catch {}
+};
 
 
 const injectFonts = () => {
@@ -884,7 +919,7 @@ const ProjectCard = ({ project }) => {
     )}
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_70%,black_100%)]" />
        <button
-          onClick={open}
+          onClick={() => { open(); track('open_gallery', { project_id: project.id, project_title: project.title }); }}
           aria-label={`Open gallery: ${project.title}`}
           className="absolute bottom-6 right-6 border border-white px-4 py-2 text-sm uppercase hover:bg-white hover:text-black transition"
         >
@@ -972,6 +1007,9 @@ const Portfolio = () => {
             aria-modal="true"
             aria-label={`${active.title} gallery`}
             aria-keyshortcuts="ArrowLeft ArrowRight Escape"
+            onClick={(e) => {
+              if (e.currentTarget === e.target) { close(); track('gallery_close_backdrop', { project_id: active.id }); }
+            }}
           >
             <div className="max-w-6xl mx-auto">
               <div className="sticky top-0 z-10 mb-3 flex items-center justify-between text-white bg-black/95 pb-3">
@@ -980,9 +1018,26 @@ const Portfolio = () => {
                   <div className="text-lg font-semibold">{active.title}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={prev} title="Previous image" aria-label="Previous image" className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronLeft className="h-4 w-4"/></button>
-                  <button onClick={next} title="Next image" aria-label="Next image" className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronRight className="h-4 w-4"/></button>
-                  <button onClick={close} title="Close gallery" aria-label="Close gallery" className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
+                  <button
+                    onClick={() => { prev(); track('gallery_prev', { project_id: active.id, idx }); }}
+                    title="Previous image" aria-label="Previous image"
+                    className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronLeft className="h-4 w-4"/></button>
+                  <button
+                    onClick={() => { next(); track('gallery_next', { project_id: active.id, idx }); }}
+                    title="Next image" aria-label="Next image"
+                    className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronRight className="h-4 w-4"/></button>
+                  <button
+                    onClick={() => {
+                      const url = `${location.origin}/#portfolio/${active.id}`;
+                      navigator.clipboard?.writeText(url);
+                      track('gallery_copy_link', { project_id: active.id });
+                    }}
+                    title="Copy link" aria-label="Copy link"
+                    className="rounded-full border border-white/30 px-3 py-1 text-white">Copy Link</button>
+                  <button
+                    onClick={() => { close(); track('gallery_close', { project_id: active.id }); }}
+                    title="Close gallery" aria-label="Close gallery"
+                    className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
                 </div>
               </div>
               <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative inline-grid place-items-center bg-black w-fit mx-auto" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
@@ -1049,7 +1104,13 @@ const Resume = () => (
     <ul className="list-disc pl-6 space-y-2 mb-6">
       {RESUME_SUMMARY.map((item,i)=>(<li key={i}>{item}</li>))}
     </ul>
-    <a href={LINKS.resumePdf} target="_blank" rel="noreferrer" className="border border-current px-6 py-3 font-mono uppercase tracking-widest hover:bg-white hover:text-black transition">Download PDF</a>
+    <a
+      href={LINKS.resumePdf}
+      target="_blank"
+      rel="noreferrer"
+      onClick={() => track('resume_download', { file: LINKS.resumePdf })}
+      className="border border-current px-6 py-3 font-mono uppercase tracking-widest hover:bg-white hover:text-black transition"
+    >Download PDF</a>
   </section>
 );
 
@@ -1077,6 +1138,7 @@ export default function HenryKacikSite() {
   const [showCue, setShowCue] = useState(true);
   const [cueNumber, setCueNumber] = useState(1);
   const [renderRoute, setRenderRoute] = useState(route);
+  const mainRef = useRef(null);
   useEffect(() => { injectFonts(); }, []);
   useEffect(() => {
     const ric = (typeof window !== 'undefined' && window.requestIdleCallback)
@@ -1095,10 +1157,34 @@ export default function HenryKacikSite() {
       PROJECTS.forEach(p => {
         [p.hero, ...(p.photos || [])].forEach(preload);
       });
+      injectProjectSchema();
     });
   }, []);
   const go = useCallback((r) => { if (window.location.hash.slice(1) === r) return; if (lxMode) { setPreFade(true); setRenderRoute(route); setTimeout(() => { window.location.hash = r; }, 700); } else { setPreFade(false); window.location.hash = r; } }, [route, lxMode]);
-  useEffect(() => { if (lxMode) { setCueNumber(cueRef.current); const t0 = setTimeout(() => setShowCue(true), 40); const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(route); }, 40 + 1600); const t2 = setTimeout(() => setPreFade(false), 40 + 1600 + 100); cueRef.current = cueRef.current + 1; return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); }; } else { setShowCue(false); setPreFade(false); setRenderRoute(route); } }, [route]);
+  // Route transition
+  useEffect(() => {
+    if (lxMode) {
+      setCueNumber(cueRef.current);
+      const t0 = setTimeout(() => setShowCue(true), 40);
+      const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(route); }, 40 + 1600);
+      const t2 = setTimeout(() => setPreFade(false), 40 + 1600 + 100);
+      cueRef.current = cueRef.current + 1;
+      return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); };
+    } else { setShowCue(false); setPreFade(false); setRenderRoute(route); }
+  }, [route]);
+
+  // Dynamic document title
+  useEffect(() => {
+    const base = "Henry Kacik — Lighting & Projection Designer";
+    document.title =
+      renderRoute === "about" ? `About — ${base}` :
+      renderRoute === "portfolio" ? `Portfolio — ${base}` :
+      renderRoute === "resume" ? `Résumé — ${base}` :
+      renderRoute === "contact" ? `Contact — ${base}` : base;
+  }, [renderRoute]);
+
+  // Focus main on route changes
+  useEffect(() => { mainRef.current?.focus?.(); }, [renderRoute]);
   const onSeeWork = useCallback(() => go("portfolio"), [go]);
   return (
     <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\"' }}>
@@ -1111,7 +1197,7 @@ export default function HenryKacikSite() {
         lxMode ? (
           <motion.div initial={{opacity:0}} animate={{opacity: preFade ? 0 : 1}} transition={{ duration: 0.7, ease: 'easeInOut' }}>
             <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
-            <main id="main" key={renderRoute}>
+            <main id="main" key={renderRoute} ref={mainRef} tabIndex="-1">
               {renderRoute === "home" && <Hero onSeeWork={onSeeWork} onNavigate={go} />}
               {renderRoute === "about" && <About onNavigate={go} />}
               {renderRoute === "portfolio" && <Portfolio />}
@@ -1124,7 +1210,7 @@ export default function HenryKacikSite() {
           <AnimatePresence mode="wait">
             <motion.div key={renderRoute} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.6, ease:'easeInOut'}}>
               <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
-              <main id="main">
+              <main id="main" ref={mainRef} tabIndex="-1">
                 {renderRoute === "home" && <Hero onSeeWork={onSeeWork} onNavigate={go} />}
                 {renderRoute === "about" && <About onNavigate={go} />}
                 {renderRoute === "portfolio" && <Portfolio />}
