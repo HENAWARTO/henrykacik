@@ -152,13 +152,13 @@ const PROJECTS = [
       pub("evvys/evvy1.jpeg"),
       pub("evvys/evvy2.jpeg"),
       pub("evvys/evvy3.jpeg"),
-      pub("evvys/evvy4.jpg"),
-      pub("evvys/evvy5.jpg"),
-      pub("evvys/evvy6.jpg"),
-      pub("evvys/evvy7.jpg"),
-      pub("evvys/evvy8.jpg"),
-      pub("evvys/evvy9.jpg"),
-      pub("evvys/evvy10.jpg")
+      pub("evvys/evvy4.JPG"),
+      pub("evvys/evvy5.JPG"),
+      pub("evvys/evvy6.JPG"),
+      pub("evvys/evvy7.JPG"),
+      pub("evvys/evvy8.JPG"),
+      pub("evvys/evvy9.JPG"),
+      pub("evvys/evvy10.JPG")
     ], 
     captions: [
       "Guests gather for the Evvy's 42 Gala under warm and cool tones, the starry backdrop setting the tone for the evening with a retrofuturism theme.",
