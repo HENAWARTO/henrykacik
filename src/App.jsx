@@ -2,6 +2,18 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X } from "lucide-react";
 
+// ---- GA helper (idempotent) ----------------------------------------------
+if (typeof window !== 'undefined' && !window.__hkTrack) {
+  window.__hkTrack = (name, params = {}) => window.gtag?.('event', name, params);
+}
+const track = (name, params = {}) => window.__hkTrack?.(name, params);
+
+// Helper to inject/replace a JSON-LD <script> by id
+const upsertJsonLd = (id, data) => {
+  let el = document.getElementById(id);
+  if (!el) { el = document.createElement('script'); el.type='application/ld+json'; el.id=id; document.head.appendChild(el); }
+  el.textContent = JSON.stringify(data);
+};
 
 const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
 
@@ -320,32 +332,20 @@ const PROJECTS = [
 
 // ---- JSON-LD ItemList for projects ----
 const injectProjectSchema = () => {
-  try {
-    const list = {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      "name": "Lighting Portfolio",
-      "itemListElement": PROJECTS.map((p, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "item": {
-          "@type": "CreativeWork",
-          "name": p.title,
-          "description": p.blurb,
-          "image": p.hero.startsWith('http') ? p.hero : (location.origin + (p.hero.startsWith('/') ? p.hero : '/' + p.hero)),
-          "url": `${location.origin}/#portfolio/${p.id}`,
-          "dateCreated": p.year
-        }
-      }))
-    };
-    const el = document.createElement('script');
-    el.type = 'application/ld+json';
-    el.id = 'project-schema';
-    el.textContent = JSON.stringify(list);
-    const prev = document.getElementById('project-schema');
-    if (prev) prev.remove();
-    document.head.appendChild(el);
-  } catch {}
+  const itemList = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": PROJECTS.map((p, i) => ({
+      "@type": "CreativeWork",
+      "position": i + 1,
+      "name": p.title,
+      "description": p.blurb,
+      "image": p.photos?.[0] || p.hero,
+      "dateCreated": p.year,
+      "url": `https://henrykacik.com/#portfolio/${p.id}`
+    }))
+  };
+  upsertJsonLd('hk-projects-schema', itemList);
 };
 
 const LINKS = { email: "hchkacik@gmail.com", phone: "+1 (970) 531-3977", location: "Brooklyn, NY", resumePdf: "/henry-kacik-resume.pdf" };
@@ -382,14 +382,6 @@ const SOCIALS = [
   },
   { key: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/user/penguinking811', Icon: Music2 }
 ];
-
-// NOTE: a small GA helper may already exist; if not, this is safe & idempotent.
-// Ensure GA event helper exists:
-if (typeof window !== 'undefined' && !window.__hkTrack) {
-  window.__hkTrack = (name, params = {}) => window.gtag?.('event', name, params);
-}
-const track = (name, params = {}) => window.__hkTrack?.(name, params);
-
 
 const injectFonts = () => {
   const head = document.head;
@@ -736,6 +728,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           <button
             onClick={() => {
               const it = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[0];
+              track('hero_open_project', { id: it.id, title: it.title });
               window.location.hash = `portfolio/${it.id}`;
               onNavigate('portfolio');
             }}
@@ -1324,8 +1317,22 @@ const Contact = () => (
     <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-10">
       <div className="md:col-span-6 space-y-4 text-lg">
         <p className="opacity-90">New projects, assisting, tours, concerts — I’d love to connect.</p>
-        <div><Mail className="inline mr-2"/><a href={`mailto:${LINKS.email}`} className="underline">{LINKS.email}</a></div>
-        <div><Phone className="inline mr-2"/><a href={`tel:${LINKS.phone.replace(/[^+\d]/g,'')}`} className="underline">{LINKS.phone}</a></div>
+        <div>
+          <Mail className="inline mr-2"/>
+          <a
+            href={`mailto:${LINKS.email}`}
+            className="underline"
+            onClick={() => track('contact_email_click', { email: LINKS.email })}
+          >{LINKS.email}</a>
+        </div>
+        <div>
+          <Phone className="inline mr-2"/>
+          <a
+            href={`tel:${LINKS.phone.replace(/[^+\d]/g,'')}`}
+            className="underline"
+            onClick={() => track('contact_phone_click', { phone: LINKS.phone })}
+          >{LINKS.phone}</a>
+        </div>
         <div><MapPin className="inline mr-2"/>{LINKS.location}</div>
       </div>
       <div className="md:col-span-6">
@@ -1380,11 +1387,15 @@ export default function HenryKacikSite() {
   const [renderRoute, setRenderRoute] = useState(route);
   const mainRef = useRef(null);
   useEffect(() => { injectFonts(); }, []);
+  // Inject project schema once on mount
+  useEffect(() => { try { injectProjectSchema(); } catch {} }, []);
+  // Tamer image preloading: respect Data Saver, only hero + first 2 per project
   useEffect(() => {
     const ric = (typeof window !== 'undefined' && window.requestIdleCallback)
       ? window.requestIdleCallback
       : (cb) => setTimeout(cb, 200);
-
+    const saveData = navigator?.connection?.saveData || navigator?.saveData;
+    if (saveData) return; // be kind to data saver users
     ric(() => {
       const preload = (u, eager = false) => {
         if (!u) return;
@@ -1394,10 +1405,10 @@ export default function HenryKacikSite() {
         img.src = u;
       };
       preload(ABOUT.photo, true);
-      PROJECTS.forEach(p => {
-        [p.hero, ...(p.photos || [])].forEach(preload);
+      PROJECTS.forEach((p, idx) => {
+        const imgs = [p.hero, ...(p.photos || []).slice(0, 2)];
+        imgs.forEach(u => preload(u, idx === 0)); // only first project eager
       });
-      injectProjectSchema();
     });
   }, []);
   const go = useCallback((r) => { if (window.location.hash.slice(1) === r) return; if (lxMode) { setPreFade(true); setRenderRoute(route); setTimeout(() => { window.location.hash = r; }, 700); } else { setPreFade(false); window.location.hash = r; } }, [route, lxMode]);
