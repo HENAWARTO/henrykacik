@@ -576,19 +576,74 @@ const Nav = ({ route, onNav, lxMode, setLxMode }) => {
   );
 };
 
+// --- NEW: isolated credits subcomponent used by Hero ---
+const HeroCredits = ({ credits }) => {
+  const [scrolling, setScrolling] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  if (!Array.isArray(credits) || credits.length === 0) return null;
+  return (
+    <div className="mt-4" data-section="hero-credits">
+      <style>{`@keyframes marqueeH { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
+      <div className="overflow-hidden flex items-center gap-3">
+        <div
+          className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
+          style={{ animation: (scrolling ? 'marqueeH 40s linear infinite' : 'none') }}
+          aria-live="off"
+        >
+          {[...credits, ...credits].map((c, i) => (
+            <span key={i} className="uppercase tracking-widest">{c}</span>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setScrolling(s => !s)}
+            className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-90 hover:opacity-100 transition"
+            aria-pressed={!scrolling}
+            title={scrolling ? 'Pause credits' : 'Play credits'}
+            data-btn="hero-credits-pause"
+          >
+            {scrolling ? 'Pause' : 'Play'}
+          </button>
+          <button
+            onClick={() => setExpanded(v => !v)}
+            className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-90 hover:opacity-100 transition"
+            aria-expanded={expanded}
+            aria-controls="hero-credits-panel"
+            title={expanded ? 'Hide credits' : 'Show all credits'}
+            data-btn="hero-credits-expand"
+          >
+            {expanded ? 'Collapse' : 'Expand'}
+          </button>
+        </div>
+      </div>
+      {expanded && (
+        <div
+          id="hero-credits-panel"
+          className="mt-2 p-3 rounded-lg border border-white/15 bg-white/5 text-xs text-white/80"
+        >
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {credits.map((c, i) => (
+              <span key={i} className="uppercase tracking-widest">{c}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Hero = ({ onSeeWork, onNavigate }) => {
   const heroFrames = useMemo(() => PROJECTS.map(p => ({ src: p.hero, title: p.title })), []);
   const [heroIdx, setHeroIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [shaderReady, setShaderReady] = useState(false);
-  const [scrolling, setScrolling] = useState(true);
-  const [expandedCredits, setExpandedCredits] = useState(false);
   const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0];
   const isHttp = typeof rawHero === 'string' && rawHero.startsWith('http');
   const heroBlocked = isHttp && (rawHero.includes('imgur.com/a/') || rawHero.includes('/gallery/') || rawHero.includes('drive.google.com'));
   const hero = heroBlocked ? PROJECTS[0]?.photos?.[0] : rawHero;
   const currentTitle = heroFrames[heroIdx]?.title || PROJECTS[0]?.title;
   const currentProject = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[heroIdx] || PROJECTS[0];
+  const currentCredits = Array.isArray(currentProject?.credits) ? currentProject.credits : [];
   const prefersReduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   const coarsePointer = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches;
   const [fit, setFit] = useState('contain');
@@ -672,53 +727,8 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           </div>
         </div>
         <div className="mt-2 text-xs opacity-70">Toggle the icon in the top-right: play = theatrical transitions, stop = smooth fades.</div>
-        {currentProject?.credits && currentProject.credits.length > 0 && (
-          <div className="mt-4">
-            <style>{`@keyframes marqueeH { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
-            <div className="overflow-hidden flex items-center gap-3">
-              <div
-                className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
-                style={{ animation: (scrolling ? 'marqueeH 36s linear infinite' : 'none') }}
-                aria-live="off"
-              >
-                {[...currentProject.credits, ...currentProject.credits].map((c, i) => (
-                  <span key={i} className="uppercase tracking-widest">{c}</span>
-                ))}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setScrolling(s => !s)}
-                  className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
-                  aria-pressed={!scrolling}
-                  title={scrolling ? 'Pause credits' : 'Play credits'}
-                >
-                  {scrolling ? 'Pause' : 'Play'}
-                </button>
-                <button
-                  onClick={() => setExpandedCredits(v => !v)}
-                  className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
-                  aria-expanded={expandedCredits}
-                  aria-controls="hero-credits-panel"
-                  title={expandedCredits ? 'Hide credits' : 'Show all credits'}
-                >
-                  {expandedCredits ? 'Collapse' : 'Expand'}
-                </button>
-              </div>
-            </div>
-            {expandedCredits && (
-              <div
-                id="hero-credits-panel"
-                className="mt-2 p-3 rounded-lg border border-white/15 bg-white/5 text-xs text-white/80"
-              >
-                <div className="flex flex-wrap gap-x-4 gap-y-2">
-                  {currentProject.credits.map((c, i) => (
-                    <span key={i} className="uppercase tracking-widest">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {/* NEW: credits controls are now a dedicated, always-mounted block when credits exist */}
+        <HeroCredits credits={currentCredits} />
       </motion.div>
     </section>
   );
