@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2 } from "lucide-react";
+// No top-level imports changed
 
 
 const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
@@ -581,7 +582,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const [paused, setPaused] = useState(false);
   const [shaderReady, setShaderReady] = useState(false);
   const [scrolling, setScrolling] = useState(true);
-  const [expandCredits, setExpandCredits] = useState(false);
+  const [expandedCredits, setExpandedCredits] = useState(false);
   const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0];
   const isHttp = typeof rawHero === 'string' && rawHero.startsWith('http');
   const heroBlocked = isHttp && (rawHero.includes('imgur.com/a/') || rawHero.includes('/gallery/') || rawHero.includes('drive.google.com'));
@@ -671,19 +672,20 @@ const Hero = ({ onSeeWork, onNavigate }) => {
           </div>
         </div>
         <div className="mt-2 text-xs opacity-70">Toggle the icon in the top-right: play = theatrical transitions, stop = smooth fades.</div>
-        {currentProject?.credits && currentProject.credits.length>0 && (
-          <div className="mt-4 overflow-hidden">
+        {currentProject?.credits && currentProject.credits.length > 0 && (
+          <div className="mt-4">
             <style>{`@keyframes marqueeH { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
-            {!expandCredits ? (
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
-                  style={{ animation: (scrolling ? 'marqueeH 35s linear infinite' : 'none') }}
-                >
-                  {[...currentProject.credits, ...currentProject.credits].map((c, i)=> (
-                    <span key={i} className="uppercase tracking-widest">{c}</span>
-                  ))}
-                </div>
+            <div className="overflow-hidden flex items-center gap-3">
+              <div
+                className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
+                style={{ animation: (scrolling ? 'marqueeH 36s linear infinite' : 'none') }}
+                aria-live="off"
+              >
+                {[...currentProject.credits, ...currentProject.credits].map((c, i) => (
+                  <span key={i} className="uppercase tracking-widest">{c}</span>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setScrolling(s => !s)}
                   className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
@@ -693,21 +695,26 @@ const Hero = ({ onSeeWork, onNavigate }) => {
                   {scrolling ? 'Pause' : 'Play'}
                 </button>
                 <button
-                  onClick={() => setExpandCredits(true)}
+                  onClick={() => setExpandedCredits(v => !v)}
                   className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
-                  title="Expand credits"
-                >Expand</button>
+                  aria-expanded={expandedCredits}
+                  aria-controls="hero-credits-panel"
+                  title={expandedCredits ? 'Hide credits' : 'Show all credits'}
+                >
+                  {expandedCredits ? 'Collapse' : 'Expand'}
+                </button>
               </div>
-            ) : (
-              <div className="opacity-80 text-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1">
-                  {currentProject.credits.map((c, i)=> (<div key={i} className="uppercase tracking-widest">{c}</div>))}
+            </div>
+            {expandedCredits && (
+              <div
+                id="hero-credits-panel"
+                className="mt-2 p-3 rounded-lg border border-white/15 bg-white/5 text-xs text-white/80"
+              >
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  {currentProject.credits.map((c, i) => (
+                    <span key={i} className="uppercase tracking-widest">{c}</span>
+                  ))}
                 </div>
-                <button
-                  onClick={() => setExpandCredits(false)}
-                  className="mt-2 text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
-                  title="Collapse credits"
-                >Collapse</button>
               </div>
             )}
           </div>
@@ -1210,8 +1217,22 @@ const Contact = () => (
   </section>
 );
 
+// Footer one-liners (rotate on full reload)
+const FOOTER_LINES = [
+  'powered by iced tea.',
+  'with great power comes great responsibility.',
+  "friends don't let friends stand in the dark.",
+  'board games by day, board ops by night.',
+  'roll lighting design with advantage.',
+  'built with gaff tape',
+  'press go'
+];
+// Pick once per app load (random on refresh)
+const FOOTER_PICK = FOOTER_LINES[Math.floor(Math.random() * FOOTER_LINES.length)];
 const Footer = () => (
-  <footer className="py-12 px-6 pb-[max(3rem,env(safe-area-inset-bottom))] text-sm text-white bg-black">© {new Date().getFullYear()} Henry Kacik — probably running on too much coffee.</footer>
+  <footer className="py-12 px-6 pb-[max(3rem,env(safe-area-inset-bottom))] text-sm text-white bg-black">
+    © {new Date().getFullYear()} Henry Kacik — {FOOTER_PICK}
+  </footer>
 );
 
 export default function HenryKacikSite() {
