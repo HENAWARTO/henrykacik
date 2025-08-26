@@ -383,10 +383,12 @@ const SOCIALS = [
   { key: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/user/penguinking811', Icon: Music2 }
 ];
 
-// --- Analytics helper ---
-const track = (name, params = {}) => {
-  try { window.gtag?.('event', name, { event_category: 'site', ...params }); } catch {}
-};
+// NOTE: a small GA helper may already exist; if not, this is safe & idempotent.
+// Ensure GA event helper exists:
+if (typeof window !== 'undefined' && !window.__hkTrack) {
+  window.__hkTrack = (name, params = {}) => window.gtag?.('event', name, params);
+}
+const track = (name, params = {}) => window.__hkTrack?.(name, params);
 
 
 const injectFonts = () => {
@@ -1247,13 +1249,14 @@ const Resume = () => {
               <a
                 href={LINKS.resumePdf}
                 download
+                onClick={() => track('resume_download', { file: LINKS.resumePdf })}
                 className="inline-flex items-center gap-2 border border-current px-4 py-2 font-mono text-xs uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition"
               >
                 <FileDown className="h-4 w-4" aria-hidden />
                 Download
               </a>
               <button
-                onClick={() => setPreview(true)}
+                onClick={() => { setPreview(true); track('resume_preview', { file: LINKS.resumePdf }); }}
                 className="inline-flex items-center gap-2 border border-current/50 px-4 py-2 font-mono text-xs uppercase tracking-widest hover:bg-black/10 dark:hover:bg-white/10 transition"
               >
                 <Eye className="h-4 w-4" aria-hidden />
@@ -1262,6 +1265,7 @@ const Resume = () => {
               <a
                 href={LINKS.resumePdf}
                 target="_blank" rel="noreferrer"
+                onClick={() => track('resume_print_intent', { file: LINKS.resumePdf })}
                 className="inline-flex items-center gap-2 border border-current/50 px-4 py-2 font-mono text-xs uppercase tracking-widest hover:bg-black/10 dark:hover:bg-white/10 transition"
               >
                 <Printer className="h-4 w-4" aria-hidden />
