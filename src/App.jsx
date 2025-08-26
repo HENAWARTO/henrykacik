@@ -224,14 +224,14 @@ const PROJECTS = [
     title: "The One Direction Macbeth Musical", 
     role: "Lighting Designer", 
     year: "2022",
-    hero: pub("macbeth/machbeth1.jpg"),
+    hero: pub("macbeth/macbeth1.jpg"),
     blurb: "The One Direction Macbeth Musical blends Shakespeare’s tragedy with the pop hits of One Direction, creating a surreal mash-up of ambition, fate, and catchy choruses. The lighting design leaned into the humor and drama, shifting quickly between concert-style energy and eerie theatrical tension.", 
     photos: [
-      pub("macbeth/machbeth1.jpg"),
-      pub("macbeth/machbeth2.jpg"),
-      pub("macbeth/machbeth3.jpg"),
-      pub("macbeth/machbeth4.jpg"),
-      pub("macbeth/machbeth5.jpg")
+      pub("macbeth/macbeth1.jpg"),
+      pub("macbeth/macbeth2.jpg"),
+      pub("macbeth/macbeth3.jpg"),
+      pub("macbeth/macbeth4.jpg"),
+      pub("macbeth/macbeth5.jpg")
     ], 
     captions: [
       "Steeped in shadows, the witches speak prophecies to Macbeth.",
