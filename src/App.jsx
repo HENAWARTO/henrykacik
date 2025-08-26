@@ -465,7 +465,14 @@ const Nav = ({ route, onNav, lxMode, setLxMode }) => {
   aria-label="Main"
   className="fixed top-0 left-0 z-50 flex w-full justify-between pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]"
 >
-      <span className="text-2xl text-white mix-blend-difference" style={{ fontFamily: 'Fraunces, serif' }}>Henry Kacik</span>
+      <button
+        onClick={() => onNav('home')}
+        aria-label="Go to home"
+        className="text-2xl text-white mix-blend-difference"
+        style={{ fontFamily: 'Fraunces, serif' }}
+      >
+        Henry Kacik
+      </button>
       <div className="flex gap-4 overflow-x-auto whitespace-nowrap">
         {items.map(it => (
           <button
@@ -625,14 +632,19 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
 
     (async () => {
       try {
-        // Capability gating
+        // Capability gating (keep it light; avoid importing three unless we pass)
         const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
         const coarsePointer  = window.matchMedia?.('(pointer: coarse)')?.matches;
         const cores = navigator.hardwareConcurrency || 4;
-        const memoryOK = (navigator.deviceMemory || 4) >= 4;
-        const enableFx = !prefersReduced && !coarsePointer && cores >= 6 && memoryOK;
-        if (!enableFx) { onError?.(); return; }
+        const memoryGB = navigator.deviceMemory || 4;
+        const enableFx = !prefersReduced && !coarsePointer && cores >= 6 && memoryGB >= 4;
 
+        if (!enableFx) {
+          onError?.();
+          return;
+        }
+
+        // Import three ONLY if enabled
         const THREE = await import('three');
         if (cancelled) return;
 
