@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X } from "lucide-react";
+import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Sparkles } from "lucide-react";
 
 // ---- GA helper (idempotent) ----------------------------------------------
 if (typeof window !== 'undefined' && !window.__hkTrack) {
@@ -1174,16 +1174,78 @@ const Portfolio = () => {
 const About = ({ onNavigate }) => (
   <section className="py-24 px-6 bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white">
     <SectionTitle>About</SectionTitle>
-    <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-8 items-center">
-      <div className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <img src={ABOUT.photo} alt="Headshot of Henry Kacik" className="w-full h-auto block" loading="eager" decoding="async" fetchpriority="high" sizes="(min-width: 768px) 40vw, 90vw"/>
-      </div>
+    <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-10 items-start">
+      {/* Headshot / card */}
+      <figure className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 bg-black relative">
+        <img
+          src={ABOUT.photo}
+          alt="Headshot of Henry Kacik"
+          className="w-full h-auto block"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          sizes="(min-width: 768px) 40vw, 90vw"
+        />
+        <figcaption className="sr-only">Brooklyn-based lighting designer, theatre/concerts/events.</figcaption>
+        {/* subtle overlay gradient for depth */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+      </figure>
+
+      {/* Copy / content */}
       <div className="md:col-span-7">
-        <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>{ABOUT.headline}</h3>
+        <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>
+          {ABOUT.headline}
+        </h3>
         <p className="text-lg leading-relaxed opacity-90">{ABOUT.bio}</p>
+
+        {/* Toolkit chips */}
+        {Array.isArray(RESUME_SUMMARY) && RESUME_SUMMARY.length > 0 && (
+          <div className="mt-6">
+            <div className="uppercase tracking-widest text-xs opacity-70 mb-2">Toolkit</div>
+            <div className="flex flex-wrap gap-2">
+              {RESUME_SUMMARY.map((t, i) => (
+                <span
+                  key={i}
+                  className="rounded-full border border-current/30 px-3 py-1 text-sm/6 opacity-90 hover:opacity-100 transition"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fun callout: spot me in two photos */}
+        <div className="mt-6 flex items-start gap-3 rounded-xl border border-current/15 bg-black/5 dark:bg-white/5 p-4">
+          <Sparkles className="mt-0.5 h-5 w-5 opacity-80" aria-hidden="true" />
+          <p className="text-sm opacity-90">
+            I pop up in <strong>two</strong> production photos on this site — see if you can spot me in the{' '}
+            <button
+              onClick={() => onNavigate('portfolio')}
+              className="underline underline-offset-4 decoration-dotted hover:opacity-100 opacity-90"
+            >
+              portfolio
+            </button>
+            .
+          </p>
+        </div>
+
+        {/* CTAs */}
         <div className="mt-6 flex flex-wrap gap-3">
-          <a href="#portfolio" onClick={(e)=>{e.preventDefault(); onNavigate('portfolio');}} className="border border-current px-5 py-2 font-mono uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">See Work</a>
-          <a href="#contact" onClick={(e)=>{e.preventDefault(); onNavigate('contact');}} className="border border-current/50 px-5 py-2 font-mono uppercase tracking-widest hover:bg-black/10 dark:hover:bg-white/10 transition">Get In Touch</a>
+          <a
+            href="#portfolio"
+            onClick={(e) => { e.preventDefault(); onNavigate('portfolio'); }}
+            className="border border-current px-5 py-2 font-mono uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition"
+          >
+            See Work
+          </a>
+          <a
+            href="#contact"
+            onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}
+            className="border border-current/50 px-5 py-2 font-mono uppercase tracking-widest hover:bg-black/10 dark:hover:bg-white/10 transition"
+          >
+            Get In Touch
+          </a>
         </div>
       </div>
     </div>
