@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2 } from "lucide-react";
 
 
 const pub = (p) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, '')}`;
@@ -358,6 +358,23 @@ const RESUME_SUMMARY = [
   "Adobe Creative Suite"
 ];
 
+// Social links (used on Contact page)
+const SOCIALS = [
+  {
+    key: 'instagram',
+    label: 'Instagram',
+    href: 'https://www.instagram.com/henry.kacik/?hl=en',
+    Icon: Instagram
+  },
+  {
+    key: 'linkedin',
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/henry-kacik-775698231/',
+    Icon: Linkedin
+  },
+  { key: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/user/penguinking811', Icon: Music2 }
+];
+
 // --- Analytics helper ---
 const track = (name, params = {}) => {
   try { window.gtag?.('event', name, { event_category: 'site', ...params }); } catch {}
@@ -435,16 +452,40 @@ const SectionTitle = ({ children }) => {
 
 const LightboxDetails = ({ active, idx }) => {
   const [open, setOpen] = useState(true);
+  const [scrolling, setScrolling] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   if (!active) return null;
   return (
     <div className="mt-3 w-full text-white/90">
       <div className="flex items-center justify-between">
-               <button
-          onClick={() => setOpen(!open)}
-          className="text-xs uppercase tracking-widest border border-white/30 rounded-full px-3 py-1 hover:bg-white hover:text-black transition"
-        >
-          {open ? 'Hide details' : 'Show details'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setOpen(!open)}
+            className="text-xs uppercase tracking-widest border border-white/30 rounded-full px-3 py-1 hover:bg-white hover:text-black transition"
+          >
+            {open ? 'Hide details' : 'Show details'}
+          </button>
+          {open && active?.credits?.length > 0 && (
+            <>
+              <button
+                onClick={() => setScrolling(s => !s)}
+                aria-pressed={!scrolling}
+                className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 hover:bg-white hover:text-black transition"
+                title={scrolling ? 'Pause credits' : 'Play credits'}
+              >
+                {scrolling ? 'Pause' : 'Play'}
+              </button>
+              <button
+                onClick={() => setExpanded(e => !e)}
+                aria-pressed={expanded}
+                className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 hover:bg-white hover:text-black transition"
+                title={expanded ? 'Collapse credits' : 'Expand credits'}
+              >
+                {expanded ? 'Collapse' : 'Expand'}
+              </button>
+            </>
+          )}
+        </div>
       </div>
       <AnimatePresence>
         {open && (
@@ -459,31 +500,32 @@ const LightboxDetails = ({ active, idx }) => {
             )}
             {active.credits && active.credits.length > 0 && (
               <div className="mt-3 overflow-hidden w-full">
-                <style>
-                  {`@keyframes marquee { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}
-                </style>
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex gap-6 py-2 whitespace-nowrap"
-                    style={{ animation: 'marquee 18s linear infinite' }}
-                  >
-                    {[...active.credits, ...active.credits].map((c, i) => (
-                      <span
-                        key={i}
-                        className="text-xs uppercase tracking-widest opacity-80"
-                      >
-                        {c}
-                      </span>
+                <style>{`@keyframes marquee { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
+                {!expanded ? (
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex gap-6 py-2 whitespace-nowrap"
+                      style={{ animation: (scrolling ? 'marquee 35s linear infinite' : 'none') }}
+                    >
+                      {[...active.credits, ...active.credits].map((c, i) => (
+                        <span key={i} className="text-xs uppercase tracking-widest opacity-80">{c}</span>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => navigator.clipboard?.writeText(active.credits.join(' · '))}
+                      className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1"
+                      title="Copy credits"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1">
+                    {active.credits.map((c, i) => (
+                      <div key={i} className="text-xs uppercase tracking-widest opacity-80">{c}</div>
                     ))}
                   </div>
-                  <button
-                    onClick={() => navigator.clipboard?.writeText(active.credits.join(' · '))}
-                    className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1"
-                    title="Copy credits"
-                  >
-                    Copy
-                  </button>
-                </div>
+                )}
               </div>
             )}
           </motion.div>
@@ -539,6 +581,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const [paused, setPaused] = useState(false);
   const [shaderReady, setShaderReady] = useState(false);
   const [scrolling, setScrolling] = useState(true);
+  const [expandCredits, setExpandCredits] = useState(false);
   const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0];
   const isHttp = typeof rawHero === 'string' && rawHero.startsWith('http');
   const heroBlocked = isHttp && (rawHero.includes('imgur.com/a/') || rawHero.includes('/gallery/') || rawHero.includes('drive.google.com'));
@@ -629,24 +672,44 @@ const Hero = ({ onSeeWork, onNavigate }) => {
         </div>
         <div className="mt-2 text-xs opacity-70">Toggle the icon in the top-right: play = theatrical transitions, stop = smooth fades.</div>
         {currentProject?.credits && currentProject.credits.length>0 && (
-          <div className="mt-4 overflow-hidden flex items-center gap-3">
+          <div className="mt-4 overflow-hidden">
             <style>{`@keyframes marqueeH { 0% { transform: translateX(0);} 100% { transform: translateX(-50%);} }`}</style>
-            <div
-              className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
-              style={{ animation: (scrolling ? 'marqueeH 22s linear infinite' : 'none') }}
-            >
-              {[...currentProject.credits, ...currentProject.credits].map((c, i)=> (
-                <span key={i} className="uppercase tracking-widest">{c}</span>
-              ))}
-            </div>
-            <button
-              onClick={() => setScrolling(s => !s)}
-              className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
-              aria-pressed={!scrolling}
-              title={scrolling ? 'Pause credits' : 'Play credits'}
-            >
-              {scrolling ? 'Pause' : 'Play'}
-            </button>
+            {!expandCredits ? (
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex gap-6 whitespace-nowrap opacity-70 text-xs"
+                  style={{ animation: (scrolling ? 'marqueeH 35s linear infinite' : 'none') }}
+                >
+                  {[...currentProject.credits, ...currentProject.credits].map((c, i)=> (
+                    <span key={i} className="uppercase tracking-widest">{c}</span>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setScrolling(s => !s)}
+                  className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
+                  aria-pressed={!scrolling}
+                  title={scrolling ? 'Pause credits' : 'Play credits'}
+                >
+                  {scrolling ? 'Pause' : 'Play'}
+                </button>
+                <button
+                  onClick={() => setExpandCredits(true)}
+                  className="text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
+                  title="Expand credits"
+                >Expand</button>
+              </div>
+            ) : (
+              <div className="opacity-80 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1">
+                  {currentProject.credits.map((c, i)=> (<div key={i} className="uppercase tracking-widest">{c}</div>))}
+                </div>
+                <button
+                  onClick={() => setExpandCredits(false)}
+                  className="mt-2 text-[11px] uppercase tracking-widest border border-white/30 rounded-full px-2 py-1 opacity-70 hover:opacity-100 transition"
+                  title="Collapse credits"
+                >Collapse</button>
+              </div>
+            )}
           </div>
         )}
       </motion.div>
@@ -1117,10 +1180,32 @@ const Resume = () => (
 const Contact = () => (
   <section className="py-24 px-6 bg-black text-white">
     <SectionTitle>Contact</SectionTitle>
-    <div className="space-y-4 text-lg">
-      <div><Mail className="inline mr-2"/><a href={`mailto:${LINKS.email}`} className="underline" >{LINKS.email}</a></div>
-      <div><Phone className="inline mr-2"/><a href={`tel:${LINKS.phone.replace(/[^+\d]/g,'')}`} className="underline" >{LINKS.phone}</a></div>
-      <div><MapPin className="inline mr-2"/>{LINKS.location}</div>
+    <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-10">
+      <div className="md:col-span-6 space-y-4 text-lg">
+        <p className="opacity-90">New projects, assisting, tours, concerts — I’d love to connect.</p>
+        <div><Mail className="inline mr-2"/><a href={`mailto:${LINKS.email}`} className="underline">{LINKS.email}</a></div>
+        <div><Phone className="inline mr-2"/><a href={`tel:${LINKS.phone.replace(/[^+\d]/g,'')}`} className="underline">{LINKS.phone}</a></div>
+        <div><MapPin className="inline mr-2"/>{LINKS.location}</div>
+      </div>
+      <div className="md:col-span-6">
+        <h3 className="uppercase tracking-widest text-sm opacity-80 mb-3">Find me online</h3>
+        <div className="flex flex-wrap gap-3">
+          {SOCIALS.map(({ key, label, href, Icon }) => (
+            <a
+              key={key}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer me"
+              onClick={() => track('social_click', { network: key })}
+              className="inline-flex items-center gap-2 border border-white/30 rounded-full px-4 py-2 text-sm hover:bg-white hover:text-black transition"
+              aria-label={`${label} (opens in new tab)`}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{label}</span>
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
   </section>
 );
