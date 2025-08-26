@@ -157,8 +157,7 @@ const PROJECTS = [
       pub("evvys/evvy6.JPG"),
       pub("evvys/evvy7.JPG"),
       pub("evvys/evvy8.JPG"),
-      pub("evvys/evvy9.JPG"),
-      pub("evvys/evvy10.JPG")
+      pub("evvys/evvy9.JPG")
     ], 
     captions: [
       "Guests gather for the Evvy's 42 Gala under warm and cool tones, the starry backdrop setting the tone for the evening with a retrofuturism theme.",
@@ -279,10 +278,10 @@ const PROJECTS = [
    title: "Fiddler on the Roof", 
    role: "Lighting Designer", 
    year: "2019", 
-   hero: pub("fiddler/fiddler7.jpg"), 
+   hero: pub("fiddler/fiddler7.JPG"), 
    blurb: "Set in the small Jewish village of Anatevka, Fiddler on the Roof follows Tevye, a poor milkman, as he struggles to balance tradition, family, and faith in a world rapidly changing around him. With humor, heart, and iconic songs, the musical celebrates love, resilience, and the ties that hold a community together.", 
    photos: [
-     pub("fiddler/fiddler1.jpg"),
+     pub("fiddler/fiddler1.JPG"),
      pub("fiddler/fiddler2.jpg"),
      pub("fiddler/fiddler3.jpg"),
      pub("fiddler/fiddler4.jpg"),
