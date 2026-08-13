@@ -29,26 +29,43 @@ const PROJECTS = [
 
  {
   id: "hildegard-2026",
-  title: "HILDEGARD",
+  title: "Sarah Kirkland Snider's Hildegarde",
   role: "Lighting Designer",
   year: "2026",
-  hero: pub("hildegard/hildegard.svg"),
-  blurb: "Sarah Kirkland Snider’s chamber opera follows Hildegard von Bingen through visions, faith, and the pull between private revelation and public power. For this semi-staged Aspen Music Festival performance, the lighting carved a sacred, intimate world out of concert architecture—shifting from monastic stillness to luminous, ecstatic bursts of color.",
+  hero: pub("hildegard/Hildegard15.jpg"),
+  blurb: "Sarah Kirkland Snider’s chamber opera follows Hildegard von Bingen through visions, faith, and the pull between private revelation and public power. For this semi-staged Aspen Music Festival performance, the lighting performed alongside the projections to create Hildegarde's religious visions.",
   photos: [
-    pub("hildegard/hildegard.svg")
+    pub("hildegard/Hildegard1.jpg"),
+    pub("hildegard/Hildegard2.jpg"),
+    pub("hildegard/Hildegard3.jpg"),
+    pub("hildegard/Hildegard4.jpg"),
+    pub("hildegard/Hildegard5.jpg"),
+    pub("hildegard/Hildegard6.jpg"),
+    pub("hildegard/Hildegard7.jpg"),
+    pub("hildegard/Hildegard8.jpg"),
+    pub("hildegard/Hildegard9.jpg"),
+    pub("hildegard/Hildegard10.jpg"),
+    pub("hildegard/Hildegard11.jpg"),
+    pub("hildegard/Hildegard12.jpg"),
+    pub("hildegard/Hildegard13.jpg"),
+    pub("hildegard/Hildegard14.jpg"),
+    pub("hildegard/Hildegard15.jpg")
+    
   ],
   captions: [
     "HILDEGARD — a placeholder portfolio image for the Aspen Music Festival semi-staged production while production photos are being finalized."
   ],
   credits: [
-    "Music and Libretto by: Sarah Kirkland Snider",
+    "Composer: Sarah Kirkland Snider",
+    "Conductor: Timothy Weiss",
     "Presented by: Aspen Music Festival and School",
     "Co-commissioned by: Beth Morrison Projects and Aspen Music Festival and School",
     "Revival Director: Zoe Lesser",
     "Lighting Designer: Henry Kacik",
     "Projection Designer: Deborah Johnson",
     "Costume Designer: Molly Irelan",
-    "Stage Manager: Annie Hennen"
+    "Stage Manager: Annie Hennen",
+    "Photographer: Diego Ridel"
   ]
  },
  {
