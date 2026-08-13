@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">HILDEGARD portfolio placeholder</title>
+  <desc id="desc">Abstract theatrical lighting treatment with arched beams, deep blue shadows, and gold-green illumination.</desc>
+  <defs>
+    <radialGradient id="halo" cx="50%" cy="28%" r="55%">
+      <stop offset="0%" stop-color="#f6f0b8" stop-opacity="0.95"/>
+      <stop offset="35%" stop-color="#8fd6a3" stop-opacity="0.48"/>
+      <stop offset="70%" stop-color="#17223f" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#03040a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#05101f"/>
+      <stop offset="45%" stop-color="#102a32"/>
+      <stop offset="100%" stop-color="#050308"/>
+    </linearGradient>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="#03040a"/>
+  <rect y="660" width="1600" height="340" fill="url(#floor)"/>
+  <ellipse cx="800" cy="610" rx="620" ry="420" fill="url(#halo)" filter="url(#softGlow)"/>
+  <g opacity="0.42" stroke="#d9f7bf" stroke-width="5" fill="none">
+    <path d="M390 740V420c0-226 184-410 410-410s410 184 410 410v320"/>
+    <path d="M515 720V430c0-158 127-285 285-285s285 127 285 285v290"/>
+    <path d="M635 700V455c0-91 74-165 165-165s165 74 165 165v245"/>
+  </g>
+  <g opacity="0.28" fill="#b7ffd2">
+    <path d="M780 95h40v640h-40z"/>
+    <path d="M260 210l34-20 346 598-34 20z"/>
+    <path d="M1306 190l34 20-346 598-34-20z"/>
+  </g>
+  <g filter="url(#softGlow)">
+    <circle cx="800" cy="598" r="98" fill="#f6f0b8" opacity="0.18"/>
+    <circle cx="800" cy="598" r="48" fill="#f6f0b8" opacity="0.36"/>
+  </g>
+  <g fill="#f8f1c4" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif">
+    <text x="800" y="820" font-size="110" letter-spacing="10">HILDEGARD</text>
+    <text x="800" y="880" font-size="28" letter-spacing="8" opacity="0.78">LIGHTING DESIGN · HENRY KACIK</text>
+  </g>
+</svg>
