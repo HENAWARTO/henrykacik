@@ -26,6 +26,31 @@ const ABOUT = {
 
 
 const PROJECTS = [
+
+ {
+  id: "hildegard-2026",
+  title: "HILDEGARD",
+  role: "Lighting Designer",
+  year: "2026",
+  hero: pub("hildegard/hildegard.svg"),
+  blurb: "Sarah Kirkland Snider’s chamber opera follows Hildegard von Bingen through visions, faith, and the pull between private revelation and public power. For this semi-staged Aspen Music Festival performance, the lighting carved a sacred, intimate world out of concert architecture—shifting from monastic stillness to luminous, ecstatic bursts of color.",
+  photos: [
+    pub("hildegard/hildegard.svg")
+  ],
+  captions: [
+    "HILDEGARD — a placeholder portfolio image for the Aspen Music Festival semi-staged production while production photos are being finalized."
+  ],
+  credits: [
+    "Music and Libretto by: Sarah Kirkland Snider",
+    "Presented by: Aspen Music Festival and School",
+    "Co-commissioned by: Beth Morrison Projects and Aspen Music Festival and School",
+    "Revival Director: Zoe Lesser",
+    "Lighting Designer: Henry Kacik",
+    "Projection Designer: Deborah Johnson",
+    "Costume Designer: Molly Irelan",
+    "Stage Manager: Annie Hennen"
+  ]
+ },
  {
    
    id: "great-comet-2024",
