@@ -26,6 +26,42 @@ const ABOUT = {
 
 
 const PROJECTS = [
+
+ {
+  id: "hildegarde-2026",
+  title: "Hildegarde",
+  role: "Lighting Designer",
+  year: "2026",
+  hero: pub("hildegarde/hildegarde1.jpg"),
+  blurb: "Hildegarde follows a visionary figure through faith, memory, and the tension between private revelation and public power. The lighting carved a sacred, intimate world out of the space—shifting from monastic stillness to luminous, ecstatic bursts of color.",
+  photos: [
+    pub("hildegarde/hildegarde1.jpg"),
+    pub("hildegarde/hildegarde2.jpg"),
+    pub("hildegarde/hildegarde3.jpg"),
+    pub("hildegarde/hildegarde4.jpg"),
+    pub("hildegarde/hildegarde5.jpg"),
+    pub("hildegarde/hildegarde6.jpg"),
+    pub("hildegarde/hildegarde7.jpg"),
+    pub("hildegarde/hildegarde8.jpg"),
+    pub("hildegarde/hildegarde9.jpg"),
+    pub("hildegarde/hildegarde10.jpg")
+  ],
+  captions: [
+    "A sacred world emerges in deep shadow and luminous, golden-green light.",
+    "A concentrated shaft of light isolates the performer in a moment of private revelation.",
+    "Architectural light frames the stage with a monastic sense of scale.",
+    "Cool shadows and warm highlights pull the scene between stillness and vision.",
+    "A brighter, ecstatic look opens the space outward.",
+    "Layered color gives the scene a feeling of memory and transformation.",
+    "The design narrows to a focused pool of light for an intimate exchange.",
+    "Soft side light sculpts the performers against the darkness.",
+    "The space glows with heightened warmth as the vision expands.",
+    "The final image leaves the world suspended between darkness and radiance."
+  ],
+  credits: [
+    "Lighting Designer: Henry Kacik"
+  ]
+ },
  {
    
    id: "great-comet-2024",
