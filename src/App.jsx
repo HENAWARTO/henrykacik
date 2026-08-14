@@ -28,28 +28,28 @@ const ABOUT = {
 const PROJECTS = [
 
  {
-  id: "hildegard-2026",
+  id: "hildegarde-2026",
   title: "Sarah Kirkland Snider's Hildegarde",
   role: "Lighting Designer",
   year: "2026",
-  hero: pub("hildegard/Hildegard15.jpg"),
+  hero: pub("hildegarde/Hildegarde15.jpg"),
   blurb: "Sarah Kirkland Snider’s chamber opera follows Hildegard von Bingen through visions, faith, and the pull between private revelation and public power. For this semi-staged Aspen Music Festival performance, the lighting performed alongside the projections to create Hildegarde's religious visions.",
   photos: [
-    pub("hildegard/Hildegard1.jpg"),
-    pub("hildegard/Hildegard2.jpg"),
-    pub("hildegard/Hildegard3.jpg"),
-    pub("hildegard/Hildegard4.jpg"),
-    pub("hildegard/Hildegard5.jpg"),
-    pub("hildegard/Hildegard6.jpg"),
-    pub("hildegard/Hildegard7.jpg"),
-    pub("hildegard/Hildegard8.jpg"),
-    pub("hildegard/Hildegard9.jpg"),
-    pub("hildegard/Hildegard10.jpg"),
-    pub("hildegard/Hildegard11.jpg"),
-    pub("hildegard/Hildegard12.jpg"),
-    pub("hildegard/Hildegard13.jpg"),
-    pub("hildegard/Hildegard14.jpg"),
-    pub("hildegard/Hildegard15.jpg")
+    pub("hildegarde/Hildegarde1.jpg"),
+    pub("hildegarde/Hildegarde2.jpg"),
+    pub("hildegarde/Hildegarde3.jpg"),
+    pub("hildegarde/Hildegarde4.jpg"),
+    pub("hildegarde/Hildegarde5.jpg"),
+    pub("hildegarde/Hildegarde6.jpg"),
+    pub("hildegarde/Hildegarde7.jpg"),
+    pub("hildegarde/Hildegarde8.jpg"),
+    pub("hildegarde/Hildegarde9.jpg"),
+    pub("hildegarde/Hildegarde10.jpg"),
+    pub("hildegarde/Hildegarde11.jpg"),
+    pub("hildegarde/Hildegarde12.jpg"),
+    pub("hildegarde/Hildegarde13.jpg"),
+    pub("hildegarde/Hildegarde14.jpg"),
+    pub("hildegarde/Hildegarde15.jpg")
     
   ],
   captions: [
