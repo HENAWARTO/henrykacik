@@ -780,7 +780,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
         <h1 className="tracking-tight" style={{ fontFamily: '"Fraunces", serif', fontSize: 'clamp(2.4rem,7vw,5.5rem)' }}>{ABOUT.headline}</h1>
         <div className="mt-2 text-white/80" style={{ fontSize: 'clamp(1rem,2.2vw,1.25rem)' }}>Featured: {currentTitle}</div>
         {currentProject?.captions && currentProject.captions[0] && (<div className="mt-1 text-white/70 text-sm">{currentProject.captions[0]}</div>)}
-        <p className="mt-4 max-w-2xl text-white/85">Design that breathes with the score. Shadow, glow, and a little chaos—on purpose.</p>
+        <p className="mt-4 max-w-2xl text-white/85">Telling stories by turning on lights.</p>
         <div className="mt-6 flex flex-wrap gap-3 items-center">
           <button onClick={onSeeWork} className="border border-white px-6 py-3 font-mono uppercase tracking-widest hover:bg-white hover:text-black transition">See Portfolio</button>
           <button
