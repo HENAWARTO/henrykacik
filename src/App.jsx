@@ -1217,29 +1217,40 @@ const Portfolio = () => {
                 </div>
               </div>
               {!viewingImage ? (
-                <motion.div initial={{opacity:0, y:12}} animate={{opacity:1, y:0}} transition={{duration:0.45}} className="grid grid-cols-1 gap-4 pb-8 sm:grid-cols-2 lg:grid-cols-3">
-                  {active.photos.map((src, photoIdx) => (
-                    <button
-                      key={src}
-                      onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
-                      className="group overflow-hidden rounded-2xl bg-zinc-900 text-left shadow-2xl ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-white/40 focus:outline-none focus:ring-2 focus:ring-white"
-                      aria-label={`Open image ${photoIdx + 1} from ${active.title}`}
-                    >
-                      <div className="aspect-[4/3] overflow-hidden bg-black">
+                <motion.div
+                  initial={{opacity:0, y:12}}
+                  animate={{opacity:1, y:0}}
+                  transition={{duration:0.45}}
+                  className="stained-gallery pb-10"
+                  style={{ '--pane-count': active.photos.length }}
+                >
+                  <div className="stained-gallery__lead" aria-hidden="true">
+                    <Sparkles className="h-4 w-4" />
+                    Interactive stained-glass collage
+                  </div>
+                  <div className="stained-gallery__grid">
+                    {active.photos.map((src, photoIdx) => (
+                      <button
+                        key={src}
+                        onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
+                        className="stained-pane group"
+                        style={{ '--pane': photoIdx }}
+                        aria-label={`Open image ${photoIdx + 1} from ${active.title}`}
+                      >
                         <img
                           src={src}
                           alt={active.captions?.[photoIdx] || `${active.title} production photo ${photoIdx + 1}`}
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                           loading="lazy"
                           decoding="async"
                         />
-                      </div>
-                      <div className="p-4 text-white">
-                        <div className="text-xs uppercase tracking-[0.2em] text-white/50">Photo {photoIdx + 1} of {active.photos.length}</div>
-                        {active.captions?.[photoIdx] && <p className="mt-2 line-clamp-2 text-sm text-white/80">{active.captions[photoIdx]}</p>}
-                      </div>
-                    </button>
-                  ))}
+                        <span className="stained-pane__shine" aria-hidden="true" />
+                        <span className="stained-pane__caption">
+                          <span className="stained-pane__kicker">Photo {photoIdx + 1} / {active.photos.length}</span>
+                          {active.captions?.[photoIdx] && <span className="stained-pane__text">{active.captions[photoIdx]}</span>}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </motion.div>
               ) : (
                 <>
