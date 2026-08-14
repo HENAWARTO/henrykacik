@@ -32,7 +32,7 @@ const PROJECTS = [
   title: "Sarah Kirkland Snider's Hildegarde",
   role: "Lighting Designer",
   year: "2026",
-  hero: pub("hildegarde/Hildegarde15.jpg"),
+  hero: pub("hildegarde/Hildegarde12.jpg"),
   blurb: "Sarah Kirkland Snider’s chamber opera follows Hildegard von Bingen through visions, faith, and the pull between private revelation and public power. For this semi-staged Aspen Music Festival performance, the lighting performed alongside the projections to create Hildegarde's religious visions.",
   photos: [
     pub("hildegarde/Hildegarde1.jpg"),
