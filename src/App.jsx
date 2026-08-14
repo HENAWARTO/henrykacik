@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Sparkles } from "lucide-react";
+import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Sparkles, Grid3X3 } from "lucide-react";
 
 // ---- GA helper (idempotent) ----------------------------------------------
 if (typeof window !== 'undefined' && !window.__hkTrack) {
@@ -1073,9 +1073,17 @@ const ProjectCard = ({ project }) => {
 
 const Portfolio = () => {
   const [active, setActive] = useState(null);
-  const [idx, setIdx] = useState(0);
-  const next = useCallback(() => setIdx(i => (i+1) % (active?.photos?.length || 1)), [active]);
-  const prev = useCallback(() => setIdx(i => (i-1 + (active?.photos?.length || 1)) % (active?.photos?.length || 1)), [active]);
+  const [idx, setIdx] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const viewingImage = idx !== null;
+  const next = useCallback(() => setIdx(i => {
+    const count = active?.photos?.length || 1;
+    return i === null ? 0 : (i + 1) % count;
+  }), [active]);
+  const prev = useCallback(() => setIdx(i => {
+    const count = active?.photos?.length || 1;
+    return i === null ? count - 1 : (i - 1 + count) % count;
+  }), [active]);
   const close = useCallback(() => {
     setActive(null);
     const hash = window.location.hash.slice(1);
@@ -1084,23 +1092,23 @@ const Portfolio = () => {
     }
   }, []);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const currentSrc = active?.photos ? active.photos[idx] : null;
+  const currentSrc = viewingImage && active?.photos ? active.photos[idx] : null;
   useEffect(() => {
     const apply = () => {
       const hash = window.location.hash.slice(1);       // e.g., "portfolio/great-comet-2024"
       const [base, id] = hash.split('/');
       if (base === 'portfolio' && id) {
         const p = PROJECTS.find(p => p.id === id);
-        if (p) { setActive(p); setIdx(0); }
+        if (p) { setActive(p); setIdx(null); }
       }
     };
     apply();
     window.addEventListener('hashchange', apply);
     return () => window.removeEventListener('hashchange', apply);
   }, []);
-  useEffect(()=>{ const onKey = (e)=>{ if(!active) return; if(e.key==='Escape') close(); if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); }; const onOpen = (e) => { if(e.detail){ setActive(e.detail); setIdx(0);} }; window.addEventListener('keydown', onKey); window.addEventListener('openGallery', onOpen); return ()=>{ window.removeEventListener('keydown', onKey); window.removeEventListener('openGallery', onOpen); }; },[active, close, next, prev]);
-  useEffect(() => { let id = null; try { id = sessionStorage.getItem('openGalleryId'); } catch(e){} if (id) { const p = PROJECTS.find(p=>p.id===id); if (p) { setActive(p); setIdx(0); } try { sessionStorage.removeItem('openGalleryId'); } catch(e){} } }, []);
-  useEffect(() => { setImgLoaded(false); }, [idx, active]);
+  useEffect(()=>{ const onKey = (e)=>{ if(!active) return; if(e.key==='Escape') { viewingImage ? setIdx(null) : close(); } if(viewingImage && e.key==='ArrowRight') next(); if(viewingImage && e.key==='ArrowLeft') prev(); }; const onOpen = (e) => { if(e.detail){ setActive(e.detail); setIdx(null);} }; window.addEventListener('keydown', onKey); window.addEventListener('openGallery', onOpen); return ()=>{ window.removeEventListener('keydown', onKey); window.removeEventListener('openGallery', onOpen); }; },[active, close, next, prev, viewingImage]);
+  useEffect(() => { let id = null; try { id = sessionStorage.getItem('openGalleryId'); } catch(e){} if (id) { const p = PROJECTS.find(p=>p.id===id); if (p) { setActive(p); setIdx(null); } try { sessionStorage.removeItem('openGalleryId'); } catch(e){} } }, []);
+  useEffect(() => { setImgLoaded(false); setCopied(false); }, [idx, active]);
   useEffect(() => {
     if (active) {
       const prev = document.body.style.overflow;
@@ -1108,7 +1116,7 @@ const Portfolio = () => {
       return () => { document.body.style.overflow = prev; };
     }
   }, [active]);
-  useEffect(() => { if (!active || !active.photos || active.photos.length < 2) return; const N = active.photos.length; const prevIdx = (idx - 1 + N) % N; const nextIdx = (idx + 1) % N; [active.photos[prevIdx], active.photos[nextIdx]].forEach((u)=>{ if(!u) return; const im = new Image(); im.decoding='async'; im.loading='eager'; im.src=u; }); }, [active, idx]);
+  useEffect(() => { if (!active || idx === null || !active.photos || active.photos.length < 2) return; const N = active.photos.length; const prevIdx = (idx - 1 + N) % N; const nextIdx = (idx + 1) % N; [active.photos[prevIdx], active.photos[nextIdx]].forEach((u)=>{ if(!u) return; const im = new Image(); im.decoding='async'; im.loading='eager'; im.src=u; }); }, [active, idx]);
   useEffect(() => {
     if (!active) return;
     const dialog = document.querySelector('[role="dialog"]');
@@ -1128,7 +1136,32 @@ const Portfolio = () => {
   }, [active]);
   const touch = useRef({x:0, y:0, active:false});
   const onTouchStart = (e) => { if (!e.touches?.[0]) return; touch.current = { x:e.touches[0].clientX, y:e.touches[0].clientY, active:true }; };
-  const onTouchEnd = (e) => { if (!touch.current.active) return; const dx = (e.changedTouches?.[0]?.clientX ?? touch.current.x) - touch.current.x; if (Math.abs(dx) > 40) (dx < 0 ? next() : prev()); touch.current.active = false; };
+  const onTouchEnd = (e) => { if (!viewingImage || !touch.current.active) return; const dx = (e.changedTouches?.[0]?.clientX ?? touch.current.x) - touch.current.x; if (Math.abs(dx) > 40) (dx < 0 ? next() : prev()); touch.current.active = false; };
+  const copyGalleryLink = useCallback(async () => {
+    if (!active) return;
+    const url = `${window.location.origin}${window.location.pathname}${window.location.search}#portfolio/${active.id}`;
+    try {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.setAttribute('readonly', '');
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+      track('gallery_copy_link', { project_id: active.id });
+    } catch (error) {
+      setCopied(false);
+      track('gallery_copy_link_error', { project_id: active.id });
+    }
+  }, [active]);
   return (
     <section className="w-full">
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
@@ -1148,64 +1181,99 @@ const Portfolio = () => {
             }}
           >
             <div className="max-w-6xl mx-auto">
-              <div className="sticky top-0 z-10 mb-3 flex items-center justify-between text-white bg-black/95 pb-3">
-                <div className="max-w-[70%]">
+              <div className="sticky top-0 z-10 mb-5 flex flex-col gap-3 text-white bg-black/95 pb-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="max-w-3xl">
                   <div className="text-xs uppercase tracking-[0.2em] opacity-80">{active.role} — {active.year}</div>
-                  <div className="text-lg font-semibold">{active.title}</div>
+                  <div className="text-2xl font-serif font-semibold">{active.title}</div>
+                  <p className="mt-1 text-sm text-white/65">
+                    {viewingImage ? 'Use the arrows to move through the selected photo, or return to the full gallery.' : 'Select any production photo to open a larger, window-friendly view.'}
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {viewingImage && (
+                    <>
+                      <button
+                        onClick={() => { setIdx(null); track('gallery_grid', { project_id: active.id }); }}
+                        title="Back to all images" aria-label="Back to all images"
+                        className="rounded-full border border-white/30 px-3 py-2 text-white hover:bg-white hover:text-black transition"><Grid3X3 className="h-4 w-4"/></button>
+                      <button
+                        onClick={() => { prev(); track('gallery_prev', { project_id: active.id, idx }); }}
+                        title="Previous image" aria-label="Previous image"
+                        className="rounded-full border border-white/30 px-3 py-2 text-white hover:bg-white hover:text-black transition"><ChevronLeft className="h-4 w-4"/></button>
+                      <button
+                        onClick={() => { next(); track('gallery_next', { project_id: active.id, idx }); }}
+                        title="Next image" aria-label="Next image"
+                        className="rounded-full border border-white/30 px-3 py-2 text-white hover:bg-white hover:text-black transition"><ChevronRight className="h-4 w-4"/></button>
+                    </>
+                  )}
                   <button
-                    onClick={() => { prev(); track('gallery_prev', { project_id: active.id, idx }); }}
-                    title="Previous image" aria-label="Previous image"
-                    className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronLeft className="h-4 w-4"/></button>
-                  <button
-                    onClick={() => { next(); track('gallery_next', { project_id: active.id, idx }); }}
-                    title="Next image" aria-label="Next image"
-                    className="rounded-full border border-white/30 px-3 py-2 text-white"><ChevronRight className="h-4 w-4"/></button>
-                  <button
-                    onClick={() => {
-                      const url = `${location.origin}/#portfolio/${active.id}`;
-                      navigator.clipboard?.writeText(url);
-                      track('gallery_copy_link', { project_id: active.id });
-                    }}
-                    title="Copy link" aria-label="Copy link"
-                    className="rounded-full border border-white/30 px-3 py-1 text-white">Copy Link</button>
+                    onClick={copyGalleryLink}
+                    title="Copy gallery link" aria-label="Copy gallery link"
+                    className="rounded-full border border-white/30 px-3 py-1 text-white hover:bg-white hover:text-black transition">{copied ? 'Copied!' : 'Copy Link'}</button>
                   <button
                     onClick={() => { close(); track('gallery_close', { project_id: active.id }); }}
                     title="Close gallery" aria-label="Close gallery"
-                    className="rounded-full border border-white/30 px-3 py-1 text-white">Close</button>
+                    className="rounded-full border border-white/30 px-3 py-1 text-white hover:bg-white hover:text-black transition">Close</button>
                 </div>
               </div>
-              <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative inline-grid place-items-center bg-black w-fit mx-auto" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
-                {!imgLoaded && (
-                  <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
-                )}
-                <AnimatePresence mode="wait">
-                  {currentSrc && (
-                    <motion.img
-                      key={currentSrc}
-                      src={currentSrc}
-                      alt={active.captions?.[idx] || ''}
-                      className="w-auto h-auto max-h-[92svh] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] object-contain"
-                      style={{ objectFit: 'contain', objectPosition: 'center' }}
-                      loading="eager"
-                      decoding="async"
-                      fetchpriority="high"
-                      initial={{opacity:0}}
-                      animate={{opacity:1}}
-                      exit={{opacity:0}}
-                      transition={{duration:0.5}}
-                      onLoad={() => setImgLoaded(true)}
-                    />
-                  )}
-                </AnimatePresence>
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_70%,black_100%)]" />
-              </motion.div>
-              <LightboxDetails active={active} idx={idx} />
-              <div className="mt-3 flex items-center justify-between text-white/80">
-                <div className="text-sm">{idx+1} / {active.photos.length}</div>
-                <div className="text-xs uppercase tracking-widest opacity-70">Arrow keys to navigate • Esc to close</div>
-              </div>
+              {!viewingImage ? (
+                <motion.div initial={{opacity:0, y:12}} animate={{opacity:1, y:0}} transition={{duration:0.45}} className="grid grid-cols-1 gap-4 pb-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {active.photos.map((src, photoIdx) => (
+                    <button
+                      key={src}
+                      onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
+                      className="group overflow-hidden rounded-2xl bg-zinc-900 text-left shadow-2xl ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-white/40 focus:outline-none focus:ring-2 focus:ring-white"
+                      aria-label={`Open image ${photoIdx + 1} from ${active.title}`}
+                    >
+                      <div className="aspect-[4/3] overflow-hidden bg-black">
+                        <img
+                          src={src}
+                          alt={active.captions?.[photoIdx] || `${active.title} production photo ${photoIdx + 1}`}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                      <div className="p-4 text-white">
+                        <div className="text-xs uppercase tracking-[0.2em] text-white/50">Photo {photoIdx + 1} of {active.photos.length}</div>
+                        {active.captions?.[photoIdx] && <p className="mt-2 line-clamp-2 text-sm text-white/80">{active.captions[photoIdx]}</p>}
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
+              ) : (
+                <>
+                  <motion.div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5}} className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 relative grid place-items-center bg-black mx-auto max-h-[78svh] max-w-full" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0.0) 70%)' }}>
+                    {!imgLoaded && (
+                      <div className="absolute inset-0 animate-pulse bg-[linear-gradient(120deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" />
+                    )}
+                    <AnimatePresence mode="wait">
+                      {currentSrc && (
+                        <motion.img
+                          key={currentSrc}
+                          src={currentSrc}
+                          alt={active.captions?.[idx] || ''}
+                          className="max-h-[78svh] w-auto max-w-full object-contain"
+                          loading="eager"
+                          decoding="async"
+                          fetchpriority="high"
+                          initial={{opacity:0}}
+                          animate={{opacity:1}}
+                          exit={{opacity:0}}
+                          transition={{duration:0.5}}
+                          onLoad={() => setImgLoaded(true)}
+                        />
+                      )}
+                    </AnimatePresence>
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_74%,black_100%)]" />
+                  </motion.div>
+                  <LightboxDetails active={active} idx={idx} />
+                  <div className="mt-3 flex items-center justify-between text-white/80">
+                    <div className="text-sm">{idx+1} / {active.photos.length}</div>
+                    <div className="text-xs uppercase tracking-widest opacity-70">Arrow keys or swipe to navigate • Esc returns to gallery</div>
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
         )}
@@ -1543,7 +1611,7 @@ export default function HenryKacikSite() {
   useEffect(() => { mainRef.current?.focus?.(); }, [renderRoute]);
   const onSeeWork = useCallback(() => go("portfolio"), [go]);
   return (
-    <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\"' }}>
+    <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"' }}>
       <a href="#main" className="sr-only focus:not-sr-only fixed top-2 left-2 z-[1000] bg-white text-black px-3 py-2 rounded">
   Skip to content
 </a>
