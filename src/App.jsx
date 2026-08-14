@@ -53,9 +53,10 @@ const PROJECTS = [
     
   ],
   captions: [
+    "Hildegarde has a vision of a mountain.",
     "Hildegarde sees a vision from God.",
     "Hildegarde shares her visions with her sisters and Richardis.",
-    "Richardis and two sisters sing before the church window."
+    "Richardis and two sisters sing before the church window.",
     "Richardis draws Hildegarde's visions, giving them a physical manifestation.",
     "Volmar is delighted and surprised by the drawing that Richardis has done of Hildegarde's visions.",
     "Hildegarde's visions haunt her.",
