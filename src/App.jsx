@@ -1226,7 +1226,7 @@ const Portfolio = () => {
                 >
                   <div className="stained-gallery__lead" aria-hidden="true">
                     <Sparkles className="h-4 w-4" />
-                    Interactive stained-glass collage
+                    Production photo wall
                   </div>
                   <div className="stained-gallery__grid">
                     {active.photos.map((src, photoIdx) => (
