@@ -450,6 +450,8 @@ const useDarkMode = () => {
   return [dark, setDark];
 };
 
+const routeBase = (r) => (r || "home").split('/')[0] || "home";
+
 const useHashRoute = () => {
   const [route, setRoute] = useState(() => (window.location.hash?.slice(1) || "home"));
   useEffect(() => { const onHash = () => setRoute(window.location.hash?.slice(1) || "home"); window.addEventListener("hashchange", onHash); return () => window.removeEventListener("hashchange", onHash); }, []);
@@ -770,8 +772,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
             onClick={() => {
               const it = PROJECTS.find(p=>p.title===currentTitle) || PROJECTS[0];
               track('hero_open_project', { id: it.id, title: it.title });
-              window.location.hash = `portfolio/${it.id}`;
-              onNavigate('portfolio');
+              onNavigate(`portfolio/${it.id}`);
             }}
             className="border border-white/40 px-6 py-3 font-mono uppercase tracking-widest hover:bg-white/10 transition"
           >
@@ -1481,13 +1482,14 @@ const Footer = () => (
 
 export default function HenryKacikSite() {
   const { route } = useHashRoute();
+  const currentRoute = routeBase(route);
   const [_dark] = useDarkMode();
   const [lxMode, setLxMode] = useState(true);
   const cueRef = useRef(1);
   const [preFade, setPreFade] = useState(false);
   const [showCue, setShowCue] = useState(true);
   const [cueNumber, setCueNumber] = useState(1);
-  const [renderRoute, setRenderRoute] = useState(route);
+  const [renderRoute, setRenderRoute] = useState(currentRoute);
   const mainRef = useRef(null);
   useEffect(() => { injectFonts(); }, []);
   // Inject project schema once on mount
@@ -1514,18 +1516,18 @@ export default function HenryKacikSite() {
       });
     });
   }, []);
-  const go = useCallback((r) => { if (window.location.hash.slice(1) === r) return; if (lxMode) { setPreFade(true); setRenderRoute(route); setTimeout(() => { window.location.hash = r; }, 700); } else { setPreFade(false); window.location.hash = r; } }, [route, lxMode]);
+  const go = useCallback((r) => { if (window.location.hash.slice(1) === r) return; if (lxMode) { setPreFade(true); setRenderRoute(currentRoute); setTimeout(() => { window.location.hash = r; }, 700); } else { setPreFade(false); window.location.hash = r; } }, [currentRoute, lxMode]);
   // Route transition
   useEffect(() => {
     if (lxMode) {
       setCueNumber(cueRef.current);
       const t0 = setTimeout(() => setShowCue(true), 40);
-      const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(route); }, 40 + 1600);
+      const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(currentRoute); }, 40 + 1600);
       const t2 = setTimeout(() => setPreFade(false), 40 + 1600 + 100);
       cueRef.current = cueRef.current + 1;
       return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); };
-    } else { setShowCue(false); setPreFade(false); setRenderRoute(route); }
-  }, [route]);
+    } else { setShowCue(false); setPreFade(false); setRenderRoute(currentRoute); }
+  }, [currentRoute, lxMode]);
 
   // Dynamic document title
   useEffect(() => {
