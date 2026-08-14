@@ -53,7 +53,21 @@ const PROJECTS = [
     
   ],
   captions: [
-    "HILDEGARD — a placeholder portfolio image for the Aspen Music Festival semi-staged production while production photos are being finalized."
+    "Hildegarde sees a vision from God.",
+    "Hildegarde shares her visions with her sisters and Richardis.",
+    "Richardis and two sisters sing before the church window."
+    "Richardis draws Hildegarde's visions, giving them a physical manifestation.",
+    "Volmar is delighted and surprised by the drawing that Richardis has done of Hildegarde's visions.",
+    "Hildegarde's visions haunt her.",
+    "Hildegarde's visions intensify as she feels her emotions.",
+    "Devils come from Hildegarde's visions to haunt her.",
+    "Abbot Kuno denies Hildegarde her wishes.",
+    "Angels sing in Hildegarde's visions.",
+    "Hildegarde has a vision of the future, of her abbey without men.",
+    "Hildegarde celebrates her vision becoming reality as she establishes the first all women abbey.",
+    "The Conductor and band take a bow alongside the cast.",
+    "The light of her holy vision backlights Hildegarde as she is lost in the sauce."
+
   ],
   credits: [
     "Composer: Sarah Kirkland Snider",
