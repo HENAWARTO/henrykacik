@@ -28,12 +28,12 @@ const ABOUT = {
 const PROJECTS = [
 
  {
-  id: "hildegarde-2026",
-  title: "Sarah Kirkland Snider's Hildegarde",
+  id: "hildegard-2026",
+  title: "Sarah Kirkland Snider's Hildegard",
   role: "Lighting Designer",
   year: "2026",
   hero: pub("hildegarde/Hildegarde12.jpg"),
-  blurb: "Sarah Kirkland Snider’s chamber opera follows Hildegard von Bingen through visions, faith, and the pull between private revelation and public power. For this semi-staged Aspen Music Festival performance, the lighting performed alongside the projections to create Hildegarde's religious visions.",
+  blurb: "Sarah Kirkland Snider’s chamber opera follows Hildegard von Bingen through visions, faith, and the pull between private revelation and public power. For this semi-staged Aspen Music Festival performance, the lighting performed alongside the projections to create Hildegard's religious visions.",
   photos: [
     pub("hildegarde/Hildegarde1.jpg"),
     pub("hildegarde/Hildegarde2.jpg"),
@@ -53,21 +53,21 @@ const PROJECTS = [
     
   ],
   captions: [
-    "Hildegarde has a vision of a mountain.",
-    "Hildegarde sees a vision from God.",
-    "Hildegarde shares her visions with her sisters and Richardis.",
+    "Hildegard has a vision of a mountain.",
+    "Hildegard sees a vision from God.",
+    "Hildegard shares her visions with her sisters and Richardis.",
     "Richardis and two sisters sing before the church window.",
-    "Richardis draws Hildegarde's visions, giving them a physical manifestation.",
-    "Volmar is delighted and surprised by the drawing that Richardis has done of Hildegarde's visions.",
-    "Hildegarde's visions haunt her.",
-    "Hildegarde's visions intensify as she feels her emotions.",
-    "Devils come from Hildegarde's visions to haunt her.",
-    "Abbot Kuno denies Hildegarde her wishes.",
-    "Angels sing in Hildegarde's visions.",
-    "Hildegarde has a vision of the future, of her abbey without men.",
-    "Hildegarde celebrates her vision becoming reality as she establishes the first all women abbey.",
+    "Richardis draws Hildegard's visions, giving them a physical manifestation.",
+    "Volmar is delighted and surprised by the drawing that Richardis has done of Hildegard's visions.",
+    "Hildegard's visions haunt her.",
+    "Hildegard's visions intensify as she feels her emotions.",
+    "Devils come from Hildegard's visions to haunt her.",
+    "Abbot Kuno denies Hildegard her wishes.",
+    "Angels sing in Hildegard's visions.",
+    "Hildegard has a vision of the future, of her abbey without men.",
+    "Hildegard celebrates her vision becoming reality as she establishes the first all women abbey.",
     "The Conductor and band take a bow alongside the cast.",
-    "The light of her holy vision backlights Hildegarde as she is lost in the sauce."
+    "The light of her holy vision backlights Hildegard as she is lost in the sauce."
 
   ],
   credits: [
