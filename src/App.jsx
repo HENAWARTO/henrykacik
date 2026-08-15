@@ -809,7 +809,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
   const animRef = useRef(null);
-  const mouseRef = useRef({ brush: 0, target: 0 });
+  const mouseRef = useRef({ brush: 0, target: 0, x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 });
   const inViewRef = useRef(true);
 
   useEffect(() => {
@@ -837,10 +837,10 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         const container = containerRef.current;
         if (!container) return;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.setClearColor(0x000000, 0);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.35));
         renderer.setSize(container.clientWidth, container.clientHeight, true);
         Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' });
         rendererRef.current = renderer;
@@ -953,7 +953,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         const onResize = () => {
           const w = container.clientWidth, h = container.clientHeight;
           renderer.setSize(w, h, true);
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.35));
           uniforms.u_res.value.set(w, h);
         };
         onResize();
@@ -965,8 +965,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
           if (inside) {
             const x = (e.clientX - rect.left) / rect.width;
             const y = 1.0 - (e.clientY - rect.top) / rect.height;
-            uniforms.u_mouse.value.set(x, y);
-            mouseRef.current.target = Math.min(1, mouseRef.current.target + 0.08);
+            mouseRef.current.targetX = x;
+            mouseRef.current.targetY = y;
+            mouseRef.current.target = 0.72;
           } else {
             mouseRef.current.target = 0;
           }
@@ -982,7 +983,11 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
           if (inViewRef.current) {
             uniforms.u_time.value = (performance.now() - start) / 1000;
             const m = mouseRef.current;
-            m.brush += (m.target - m.brush) * 0.1;
+            // A deliberately slow spring removes the hard cursor-following edge.
+            m.x += (m.targetX - m.x) * 0.035;
+            m.y += (m.targetY - m.y) * 0.035;
+            m.brush += (m.target - m.brush) * 0.028;
+            uniforms.u_mouse.value.set(m.x, m.y);
             uniforms.u_brush.value = m.brush;
             renderer.render(scene, camera);
           }
@@ -1043,7 +1048,7 @@ const ProjectCard = ({ project }) => {
   const [ratioStr, setRatioStr] = useState('16 / 9');
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
-    <div ref={ref} className="relative flex flex-col md:grid md:grid-cols-12">
+    <div ref={ref} className="portfolio-project relative flex flex-col md:grid md:grid-cols-12">
      <div
   className="md:col-span-8 overflow-hidden group relative bg-black"
   style={{ aspectRatio: ratioStr }}
@@ -1059,7 +1064,7 @@ const ProjectCard = ({ project }) => {
       style={{ objectFit: 'contain', objectPosition: 'center' }}
       loading="lazy"
       decoding="async"
-        fetchpriority="high"
+      fetchpriority="low"
       sizes="(min-width: 1024px) 66vw, 100vw"
       onLoad={(e) => {
         const w = e.target.naturalWidth || 16;
@@ -1272,6 +1277,8 @@ const Portfolio = () => {
                               alt={active.captions?.[photoIdx] || `${active.title} production photo ${photoIdx + 1}`}
                               loading="lazy"
                               decoding="async"
+                              fetchpriority={photoIdx < 2 ? "high" : "low"}
+                              sizes="(min-width: 900px) 34vw, 55vw"
                             />
                           </motion.button>
                         ))}
@@ -1330,9 +1337,9 @@ const About = ({ onNavigate }) => (
           src={ABOUT.photo}
           alt="Headshot of Henry Kacik"
           className="w-full h-auto block"
-          loading="eager"
+          loading="lazy"
           decoding="async"
-          fetchpriority="high"
+          fetchpriority="low"
           sizes="(min-width: 768px) 40vw, 90vw"
         />
         <figcaption className="sr-only">Brooklyn-based lighting designer, theatre/concerts/events.</figcaption>
