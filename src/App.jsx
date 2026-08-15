@@ -1108,6 +1108,13 @@ const Portfolio = () => {
   }, []);
   const [imgLoaded, setImgLoaded] = useState(false);
   const currentSrc = viewingImage && active?.photos ? active.photos[idx] : null;
+  const galleryRows = useMemo(() => {
+    if (!active?.photos) return [];
+    const rowCount = active.photos.length > 11 ? 3 : 2;
+    const rows = Array.from({ length: rowCount }, () => []);
+    active.photos.forEach((src, photoIdx) => rows[photoIdx % rowCount].push({ src, photoIdx }));
+    return rows;
+  }, [active]);
   useEffect(() => {
     const apply = () => {
       const hash = window.location.hash.slice(1);       // e.g., "portfolio/great-comet-2024"
@@ -1247,24 +1254,28 @@ const Portfolio = () => {
                   style={{ '--pane-count': active.photos.length }}
                 >
                   <div className="stained-gallery__grid">
-                    {active.photos.map((src, photoIdx) => (
-                      <motion.button
-                        key={src}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1.1, delay: Math.min(photoIdx * 0.07, 0.5), ease: 'easeOut' }}
-                        onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
-                        className="stained-pane group"
-                        style={{ '--pane': photoIdx }}
-                        aria-label={`View image ${photoIdx + 1} from ${active.title}`}
-                      >
-                        <img
-                          src={src}
-                          alt={active.captions?.[photoIdx] || `${active.title} production photo ${photoIdx + 1}`}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </motion.button>
+                    {galleryRows.map((row, rowIdx) => (
+                      <div className="stained-gallery__row" key={rowIdx}>
+                        {row.map(({ src, photoIdx }, paneIdx) => (
+                          <motion.button
+                            key={src}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.9, delay: Math.min(photoIdx * 0.055, 0.45), ease: 'easeOut' }}
+                            onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
+                            className="stained-pane group"
+                            style={{ '--pane': paneIdx, '--row': rowIdx }}
+                            aria-label={`View image ${photoIdx + 1} from ${active.title}`}
+                          >
+                            <img
+                              src={src}
+                              alt={active.captions?.[photoIdx] || `${active.title} production photo ${photoIdx + 1}`}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </motion.button>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </motion.div>
