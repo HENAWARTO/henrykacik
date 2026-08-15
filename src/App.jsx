@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Sparkles, Grid3X3 } from "lucide-react";
+import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Grid3X3, ArrowUpRight } from "lucide-react";
 
 // ---- GA helper (idempotent) ----------------------------------------------
 if (typeof window !== 'undefined' && !window.__hkTrack) {
@@ -450,11 +450,11 @@ const injectFonts = () => {
     head.appendChild(l);
   }
 
-  if (!head.querySelector('link[data-font="inter"]')) {
+  if (!head.querySelector('link[data-font="jost"]')) {
     const l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap';
-    l.setAttribute('data-font', 'inter');
+    l.href = 'https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap';
+    l.setAttribute('data-font', 'jost');
     head.appendChild(l);
   }
 };
@@ -1193,7 +1193,10 @@ const Portfolio = () => {
             aria-label={`${active.title} gallery`}
             aria-keyshortcuts="ArrowLeft ArrowRight Escape"
             onClick={(e) => {
-              if (e.currentTarget === e.target) { close(); track('gallery_close_backdrop', { project_id: active.id }); }
+              if (e.currentTarget === e.target) {
+                if (viewingImage) setIdx(null); else close();
+                track('gallery_close_backdrop', { project_id: active.id });
+              }
             }}
           >
             <div className="max-w-6xl mx-auto">
@@ -1227,8 +1230,12 @@ const Portfolio = () => {
                     title="Copy gallery link" aria-label="Copy gallery link"
                     className="rounded-full border border-white/30 px-3 py-1 text-white hover:bg-white hover:text-black transition">{copied ? 'Copied!' : 'Copy Link'}</button>
                   <button
-                    onClick={() => { close(); track('gallery_close', { project_id: active.id }); }}
-                    title="Close gallery" aria-label="Close gallery"
+                    onClick={() => {
+                      if (viewingImage) setIdx(null); else close();
+                      track('gallery_close', { project_id: active.id, destination: viewingImage ? 'gallery' : 'portfolio' });
+                    }}
+                    title={viewingImage ? "Close image and return to gallery" : "Close gallery"}
+                    aria-label={viewingImage ? "Close image and return to gallery" : "Close gallery"}
                     className="rounded-full border border-white/30 px-3 py-1 text-white hover:bg-white hover:text-black transition">Close</button>
                 </div>
               </div>
@@ -1237,29 +1244,18 @@ const Portfolio = () => {
                   initial={{opacity:0, y:12}}
                   animate={{opacity:1, y:0}}
                   transition={{duration:0.45}}
-                  className="stained-gallery pb-10"
+                  className="stained-gallery"
                   style={{ '--pane-count': active.photos.length }}
                 >
-                  <div className="stained-gallery__lead" aria-hidden="true">
-                    <Sparkles className="h-4 w-4" />
-                    Interactive production wall
-                  </div>
                   <div className="stained-gallery__grid">
                     {active.photos.map((src, photoIdx) => (
                       <motion.button
                         key={src}
                         layout
                         transition={{ layout: { duration: 0.62, type: 'spring', bounce: 0.08 } }}
-                        onClick={() => {
-                          if (spotlightIdx === photoIdx) {
-                            setIdx(photoIdx);
-                            track('gallery_select_image', { project_id: active.id, idx: photoIdx });
-                          } else {
-                            setSpotlightIdx(photoIdx);
-                            track('gallery_select_pane', { project_id: active.id, idx: photoIdx });
-                          }
-                        }}
-                        onDoubleClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
+                        onMouseEnter={() => setSpotlightIdx(photoIdx)}
+                        onFocus={() => setSpotlightIdx(photoIdx)}
+                        onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
                         className={`stained-pane group ${spotlightIdx === photoIdx ? 'is-active' : ''}`}
                         style={{ '--pane': photoIdx }}
                         aria-label={`${spotlightIdx === photoIdx ? 'Featured' : 'Feature'} image ${photoIdx + 1} from ${active.title}`}
@@ -1271,14 +1267,6 @@ const Portfolio = () => {
                           loading="lazy"
                           decoding="async"
                         />
-                        <span className="stained-pane__shine" aria-hidden="true" />
-                        <span className="stained-pane__caption">
-                          <span className="stained-pane__kicker">Photo {photoIdx + 1} / {active.photos.length}</span>
-                          {active.captions?.[photoIdx] && <span className="stained-pane__text">{active.captions[photoIdx]}</span>}
-                        </span>
-                        {spotlightIdx === photoIdx && (
-                          <span className="stained-pane__expand">View full image <ChevronRight className="h-4 w-4" /></span>
-                        )}
                       </motion.button>
                     ))}
                   </div>
@@ -1526,32 +1514,38 @@ const Resume = () => {
 };
 
 const Contact = () => (
-  <section className="py-24 px-6 bg-black text-white">
-    <SectionTitle>Contact</SectionTitle>
-    <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-10">
-      <div className="md:col-span-6 space-y-4 text-lg">
-        <p className="opacity-90">New projects, assisting, tours, concerts — I’d love to connect.</p>
-        <div>
-          <Mail className="inline mr-2"/>
+  <section className="contact-page py-28 px-6 bg-black text-white">
+    <div className="mx-auto max-w-5xl">
+      <p className="contact-eyebrow">Let’s make something memorable</p>
+      <h1 className="contact-heading">Have a stage in mind?</h1>
+      <p className="contact-intro">New projects, assisting, tours, concerts — I’d love to hear what you’re creating.</p>
+      <div className="contact-grid">
+        <div className="contact-card contact-card--primary">
+          <Mail className="contact-icon" aria-hidden="true"/>
+          <span className="contact-label">Email</span>
           <a
             href={`mailto:${LINKS.email}`}
-            className="underline"
+            className="contact-link"
             onClick={() => track('contact_email_click', { email: LINKS.email })}
-          >{LINKS.email}</a>
+          >{LINKS.email}<ArrowUpRight aria-hidden="true" /></a>
         </div>
-        <div>
-          <Phone className="inline mr-2"/>
+        <div className="contact-card">
+          <Phone className="contact-icon" aria-hidden="true"/>
+          <span className="contact-label">Phone</span>
           <a
             href={`tel:${LINKS.phone.replace(/[^+\d]/g,'')}`}
-            className="underline"
+            className="contact-link"
             onClick={() => track('contact_phone_click', { phone: LINKS.phone })}
-          >{LINKS.phone}</a>
+          >{LINKS.phone}<ArrowUpRight aria-hidden="true" /></a>
         </div>
-        <div><MapPin className="inline mr-2"/>{LINKS.location}</div>
-      </div>
-      <div className="md:col-span-6">
-        <h3 className="uppercase tracking-widest text-sm opacity-80 mb-3">Find me online</h3>
-        <div className="flex flex-wrap gap-3">
+        <div className="contact-card">
+          <MapPin className="contact-icon" aria-hidden="true"/>
+          <span className="contact-label">Based in</span>
+          <span className="contact-link">{LINKS.location}</span>
+        </div>
+        <div className="contact-card contact-card--social">
+          <span className="contact-label">Elsewhere</span>
+          <div className="flex flex-wrap gap-2">
           {SOCIALS.map(({ key, label, href, Icon }) => (
             <a
               key={key}
@@ -1559,13 +1553,14 @@ const Contact = () => (
               target="_blank"
               rel="noopener noreferrer me"
               onClick={() => track('social_click', { network: key })}
-              className="inline-flex items-center gap-2 border border-white/30 rounded-full px-4 py-2 text-sm hover:bg-white hover:text-black transition"
+              className="contact-social"
               aria-label={`${label} (opens in new tab)`}
             >
               <Icon className="h-4 w-4" />
               <span>{label}</span>
             </a>
           ))}
+          </div>
         </div>
       </div>
     </div>
@@ -1653,7 +1648,7 @@ export default function HenryKacikSite() {
   useEffect(() => { mainRef.current?.focus?.(); }, [renderRoute]);
   const onSeeWork = useCallback(() => go("portfolio"), [go]);
   return (
-    <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"' }}>
+    <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Jost, Futura, "Century Gothic", system-ui, sans-serif' }}>
       <a href="#main" className="sr-only focus:not-sr-only fixed top-2 left-2 z-[1000] bg-white text-black px-3 py-2 rounded">
   Skip to content
 </a>
