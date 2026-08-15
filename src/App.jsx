@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Square, Mail, Phone, MapPin, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Grid3X3, ArrowUpRight } from "lucide-react";
+import { Play, Square, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Grid3X3, ArrowUpRight } from "lucide-react";
 
 // ---- GA helper (idempotent) ----------------------------------------------
 if (typeof window !== 'undefined' && !window.__hkTrack) {
@@ -1089,7 +1089,6 @@ const ProjectCard = ({ project }) => {
 const Portfolio = () => {
   const [active, setActive] = useState(null);
   const [idx, setIdx] = useState(null);
-  const [spotlightIdx, setSpotlightIdx] = useState(0);
   const [copied, setCopied] = useState(false);
   const viewingImage = idx !== null;
   const next = useCallback(() => setIdx(i => {
@@ -1115,14 +1114,14 @@ const Portfolio = () => {
       const [base, id] = hash.split('/');
       if (base === 'portfolio' && id) {
         const p = PROJECTS.find(p => p.id === id);
-        if (p) { setActive(p); setIdx(null); setSpotlightIdx(0); }
+        if (p) { setActive(p); setIdx(null); }
       }
     };
     apply();
     window.addEventListener('hashchange', apply);
     return () => window.removeEventListener('hashchange', apply);
   }, []);
-  useEffect(()=>{ const onKey = (e)=>{ if(!active) return; if(e.key==='Escape') { viewingImage ? setIdx(null) : close(); } if(viewingImage && e.key==='ArrowRight') next(); if(viewingImage && e.key==='ArrowLeft') prev(); }; const onOpen = (e) => { if(e.detail){ setActive(e.detail); setIdx(null); setSpotlightIdx(0);} }; window.addEventListener('keydown', onKey); window.addEventListener('openGallery', onOpen); return ()=>{ window.removeEventListener('keydown', onKey); window.removeEventListener('openGallery', onOpen); }; },[active, close, next, prev, viewingImage]);
+  useEffect(()=>{ const onKey = (e)=>{ if(!active) return; if(e.key==='Escape') { viewingImage ? setIdx(null) : close(); } if(viewingImage && e.key==='ArrowRight') next(); if(viewingImage && e.key==='ArrowLeft') prev(); }; const onOpen = (e) => { if(e.detail){ setActive(e.detail); setIdx(null); } }; window.addEventListener('keydown', onKey); window.addEventListener('openGallery', onOpen); return ()=>{ window.removeEventListener('keydown', onKey); window.removeEventListener('openGallery', onOpen); }; },[active, close, next, prev, viewingImage]);
   useEffect(() => { let id = null; try { id = sessionStorage.getItem('openGalleryId'); } catch(e){} if (id) { const p = PROJECTS.find(p=>p.id===id); if (p) { setActive(p); setIdx(null); } try { sessionStorage.removeItem('openGalleryId'); } catch(e){} } }, []);
   useEffect(() => { setImgLoaded(false); setCopied(false); }, [idx, active]);
   useEffect(() => {
@@ -1205,7 +1204,7 @@ const Portfolio = () => {
                   <div className="text-xs uppercase tracking-[0.2em] opacity-80">{active.role} — {active.year}</div>
                   <div className="text-2xl font-serif font-semibold">{active.title}</div>
                   <p className="mt-1 text-sm text-white/65">
-                    {viewingImage ? 'Use the arrows to move through the selected photo, or return to the full gallery.' : 'Choose a pane to bring it forward. The rest of the wall will reshape around it.'}
+                    {viewingImage ? 'Use the arrows to move through the selected photo, or return to the full gallery.' : 'Select any frame to see the full photograph.'}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -1251,15 +1250,13 @@ const Portfolio = () => {
                     {active.photos.map((src, photoIdx) => (
                       <motion.button
                         key={src}
-                        layout
-                        transition={{ layout: { duration: 0.62, type: 'spring', bounce: 0.08 } }}
-                        onMouseEnter={() => setSpotlightIdx(photoIdx)}
-                        onFocus={() => setSpotlightIdx(photoIdx)}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1.1, delay: Math.min(photoIdx * 0.07, 0.5), ease: 'easeOut' }}
                         onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
-                        className={`stained-pane group ${spotlightIdx === photoIdx ? 'is-active' : ''}`}
+                        className="stained-pane group"
                         style={{ '--pane': photoIdx }}
-                        aria-label={`${spotlightIdx === photoIdx ? 'Featured' : 'Feature'} image ${photoIdx + 1} from ${active.title}`}
-                        aria-pressed={spotlightIdx === photoIdx}
+                        aria-label={`View image ${photoIdx + 1} from ${active.title}`}
                       >
                         <img
                           src={src}
@@ -1516,12 +1513,11 @@ const Resume = () => {
 const Contact = () => (
   <section className="contact-page py-28 px-6 bg-black text-white">
     <div className="mx-auto max-w-5xl">
-      <p className="contact-eyebrow">Let’s make something memorable</p>
-      <h1 className="contact-heading">Have a stage in mind?</h1>
-      <p className="contact-intro">New projects, assisting, tours, concerts — I’d love to hear what you’re creating.</p>
+      <p className="contact-eyebrow">Contact / New York</p>
+      <h1 className="contact-heading">Get in touch.</h1>
+      <p className="contact-intro">Available for lighting design, associate and assistant design, concerts, and live events.</p>
       <div className="contact-grid">
-        <div className="contact-card contact-card--primary">
-          <Mail className="contact-icon" aria-hidden="true"/>
+        <div className="contact-card">
           <span className="contact-label">Email</span>
           <a
             href={`mailto:${LINKS.email}`}
@@ -1530,7 +1526,6 @@ const Contact = () => (
           >{LINKS.email}<ArrowUpRight aria-hidden="true" /></a>
         </div>
         <div className="contact-card">
-          <Phone className="contact-icon" aria-hidden="true"/>
           <span className="contact-label">Phone</span>
           <a
             href={`tel:${LINKS.phone.replace(/[^+\d]/g,'')}`}
@@ -1539,7 +1534,6 @@ const Contact = () => (
           >{LINKS.phone}<ArrowUpRight aria-hidden="true" /></a>
         </div>
         <div className="contact-card">
-          <MapPin className="contact-icon" aria-hidden="true"/>
           <span className="contact-label">Based in</span>
           <span className="contact-link">{LINKS.location}</span>
         </div>
