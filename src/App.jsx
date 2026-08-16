@@ -482,8 +482,8 @@ const useLazyLoad = (options) => {
   return [ref, visible];
 };
 
-const CueOverlay = ({ cue }) => (
-    <motion.div key={`cue-${cue}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="pointer-events-none fixed inset-0 z-[60] grid place-items-center bg-black">
+const CueOverlay = ({ cue, opening = false }) => (
+    <motion.div key={`cue-${cue}`} initial={{ opacity: opening ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="pointer-events-none fixed inset-0 z-[60] grid place-items-center bg-black">
       <motion.div aria-hidden className="absolute inset-0" initial={{ opacity: 0.35, scale: 0.9 }} animate={{ opacity: 0, scale: 1.5 }} transition={{ duration: 1.2, ease: 'easeOut' }} style={{ background: 'radial-gradient(closest-side, rgba(255,255,255,0.08), rgba(255,255,255,0.0) 60%)', mixBlendMode: 'screen' }} />
       <div className="text-center">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 1, 0] }} transition={{ duration: 1.6, times: [0, 0.1, 0.85, 0.95], ease: 'easeInOut' }} className="font-mono text-sm uppercase tracking-[0.35em] text-white/80">Standby LX {cue}.</motion.div>
@@ -1702,8 +1702,9 @@ export default function HenryKacikSite() {
   // crossfades immediately behind the cue so neither mode can expose a blank page.
   const [lxMode, setLxMode] = useState(true);
   const cueRef = useRef(2);
-  const [showCue, setShowCue] = useState(false);
+  const [showCue, setShowCue] = useState(true);
   const [cueNumber, setCueNumber] = useState(1);
+  const [openingCue, setOpeningCue] = useState(true);
   const [renderRoute, setRenderRoute] = useState(currentRoute);
   const previousRouteRef = useRef(currentRoute);
   const hasEnteredRef = useRef(false);
@@ -1711,6 +1712,11 @@ export default function HenryKacikSite() {
   useEffect(() => { injectFonts(); }, []);
   useEffect(() => {
     hasEnteredRef.current = true;
+    const timer = window.setTimeout(() => {
+      setShowCue(false);
+      setOpeningCue(false);
+    }, 1750);
+    return () => window.clearTimeout(timer);
   }, []);
   // Inject project schema once on mount
   useEffect(() => { try { injectProjectSchema(); } catch {} }, []);
@@ -1748,6 +1754,7 @@ export default function HenryKacikSite() {
     previousRouteRef.current = currentRoute;
     setRenderRoute(currentRoute);
     if (!lxMode || !hasEnteredRef.current) return;
+    setOpeningCue(false);
     setCueNumber(cueRef.current);
     setShowCue(true);
     cueRef.current += 1;
@@ -1780,7 +1787,7 @@ export default function HenryKacikSite() {
   Skip to content
 </a>
       <AnimatePresence>
-        {lxMode && showCue && <CueOverlay cue={cueNumber} />}
+        {lxMode && showCue && <CueOverlay cue={cueNumber} opening={openingCue} />}
       </AnimatePresence>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
