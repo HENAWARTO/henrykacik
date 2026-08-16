@@ -92,9 +92,29 @@
   </script>
   </head>
   <body class="bg-black">
+    <!-- This opening cue is deliberately server-rendered so the entrance starts
+         before React, fonts, and the hero photograph have finished downloading. -->
+    <style>
+      #opening-cue{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;overflow:hidden;background:#000;color:#fff;transition:opacity .35s ease;pointer-events:none}
+      #opening-cue::before{content:"";position:absolute;inset:0;background:radial-gradient(closest-side,rgba(255,255,255,.08),transparent 60%);animation:opening-glow 1.2s ease-out both}
+      #opening-cue.is-exiting{opacity:0}
+      .opening-cue__copy{text-align:center;font:400 .875rem/1.25 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;text-transform:uppercase;letter-spacing:.35em}
+      .opening-cue__standby,.opening-cue__go{opacity:0;animation:opening-standby 1.6s ease-in-out both}
+      .opening-cue__go{margin-top:.5rem;animation-name:opening-go}
+      @keyframes opening-glow{from{opacity:.35;transform:scale(.9)}to{opacity:0;transform:scale(1.5)}}
+      @keyframes opening-standby{0%{opacity:0}10%,85%{opacity:.8}95%,100%{opacity:0}}
+      @keyframes opening-go{0%,20%{opacity:0}55%,90%{opacity:1}98%,100%{opacity:0}}
+      @media (prefers-reduced-motion:reduce){#opening-cue::before{animation:none}.opening-cue__standby{animation:none;opacity:.8}.opening-cue__go{animation:none;opacity:1}}
+    </style>
+    <script>window.__hkOpeningCueStarted = performance.now();</script>
+    <div id="opening-cue" role="status" aria-label="The website is opening">
+      <div class="opening-cue__copy" aria-hidden="true">
+        <div class="opening-cue__standby">Standby LX 1.</div>
+        <div class="opening-cue__go">LX 1&hellip; Go.</div>
+      </div>
+    </div>
     <div id="root"></div>
     <!-- IMPORTANT: no /henrykacik/ here -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-

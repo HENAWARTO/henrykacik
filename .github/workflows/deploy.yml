@@ -37,10 +37,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Build the Pages artifact explicitly so upload-artifact runs on Node 24.
+      # upload-pages-artifact@v4 currently delegates to upload-artifact@v4,
+      # which produces GitHub's Node 20 deprecation annotation.
+      - name: Package Pages artifact
+        run: tar --dereference --hard-dereference --directory dist -cvf "$RUNNER_TEMP/github-pages.tar" .
+
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
-          path: dist
+          name: github-pages
+          path: ${{ runner.temp }}/github-pages.tar
+          retention-days: 1
+          if-no-files-found: error
 
   deploy:
     needs: build
