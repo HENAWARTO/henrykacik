@@ -885,8 +885,7 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
             float raw = 1.0 - smoothstep(0.06, 0.34, rMod);
             float x = clamp(raw, 0.0, 1.0);
             float spotlight = x*x*x*(x*(x*6.0 - 15.0) + 10.0);
-            float edgeNoise = mix(0.94, 1.0, hash(uv*vec2(720.0,540.0) + u_time*0.18));
-            float brushMask = clamp(spotlight * edgeNoise, 0.0, 1.0) * u_brush;
+            float brushMask = spotlight * u_brush;
             float baseAmt = 0.85;
             float amt = mix(baseAmt, 0.0, brushMask);
             ang = 0.0;
@@ -902,10 +901,10 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
             stroke *= guard;
             stroke2 *= guard;
             vec3 acc = vec3(0.0); float tot = 0.0;
-            for(int i=0;i<11;i++){ float s=float(i)-5.0; float w=exp(-s*s/12.0); acc += texRGB(texUV + dir * s * stroke) * w; tot+=w; }
+            for(int i=0;i<7;i++){ float s=float(i)-3.0; float w=exp(-s*s/8.0); acc += texRGB(texUV + dir * s * stroke) * w; tot+=w; }
             vec3 stroke1 = acc / max(tot, 1e-5);
             vec3 acc2 = vec3(0.0); float tot2 = 0.0;
-            for(int j=0;j<7;j++){ float s2=float(j)-3.0; float w2=exp(-s2*s2/8.0); acc2 += texRGB(texUV + dir2 * s2 * stroke2) * w2; tot2+=w2; }
+            for(int j=0;j<5;j++){ float s2=float(j)-2.0; float w2=exp(-s2*s2/6.0); acc2 += texRGB(texUV + dir2 * s2 * stroke2) * w2; tot2+=w2; }
             vec3 stroke2c = acc2 / max(tot2, 1e-5);
             vec3 paint = mix(stroke1, stroke2c, 0.35);
             float levels = mix(7.0, 18.0, brushMask);
@@ -973,9 +972,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
           }
         };
         const onLeave = () => { mouseRef.current.target = 0; };
-        window.addEventListener('pointermove', onPointer, { passive: true });
-        window.addEventListener('pointerdown', onPointer, { passive: true });
-        window.addEventListener('pointerleave', onLeave);
+        container.addEventListener('pointermove', onPointer, { passive: true });
+        container.addEventListener('pointerdown', onPointer, { passive: true });
+        container.addEventListener('pointerleave', onLeave);
 
         let start;
         const tick = () => {
@@ -983,10 +982,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
           if (inViewRef.current) {
             uniforms.u_time.value = (performance.now() - start) / 1000;
             const m = mouseRef.current;
-            // A deliberately slow spring removes the hard cursor-following edge.
-            m.x += (m.targetX - m.x) * 0.035;
-            m.y += (m.targetY - m.y) * 0.035;
-            m.brush += (m.target - m.brush) * 0.028;
+            m.x += (m.targetX - m.x) * 0.12;
+            m.y += (m.targetY - m.y) * 0.12;
+            m.brush += (m.target - m.brush) * 0.1;
             uniforms.u_mouse.value.set(m.x, m.y);
             uniforms.u_brush.value = m.brush;
             renderer.render(scene, camera);
@@ -1017,9 +1015,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         cleanup = () => {
           if (animRef.current) cancelAnimationFrame(animRef.current);
           window.removeEventListener('resize', onResize);
-          window.removeEventListener('pointermove', onPointer);
-          window.removeEventListener('pointerdown', onPointer);
-          window.removeEventListener('pointerleave', onLeave);
+          container.removeEventListener('pointermove', onPointer);
+          container.removeEventListener('pointerdown', onPointer);
+          container.removeEventListener('pointerleave', onLeave);
           document.removeEventListener('visibilitychange', onVis);
           observer.disconnect();
           mat.dispose();
@@ -1099,47 +1097,52 @@ const mosaicColumns = (count) => {
 };
 
 const MosaicGallery = ({ project, onSelect }) => {
-  const svgRef = useRef(null);
   const columns = mosaicColumns(project.photos.length);
   const rows = Math.ceil(project.photos.length / columns);
   const width = 1200;
   const height = 760;
-  const baseNodes = useMemo(() =>
-    Array.from({ length: rows + 1 }, (_, row) =>
+  const layoutFor = useCallback((heroIndex) => {
+    const heroRow = Math.floor(heroIndex / columns);
+    const heroColumn = heroIndex % columns;
+    const columnWeights = Array.from({ length: columns }, (_, column) => column === heroColumn ? 1.85 : 1);
+    const rowWeights = Array.from({ length: rows }, (_, row) => row === heroRow ? 1.7 : 1);
+    const columnTotal = columnWeights.reduce((sum, value) => sum + value, 0);
+    const rowTotal = rowWeights.reduce((sum, value) => sum + value, 0);
+    const xLines = columnWeights.reduce((lines, value) => [...lines, lines.at(-1) + width * value / columnTotal], [0]);
+    const yLines = rowWeights.reduce((lines, value) => [...lines, lines.at(-1) + height * value / rowTotal], [0]);
+    return Array.from({ length: rows + 1 }, (_, row) =>
       Array.from({ length: columns + 1 }, (_, column) => {
         const edgeX = column === 0 || column === columns;
         const edgeY = row === 0 || row === rows;
         const xJitter = edgeX ? 0 : (((row * 47 + column * 31) % 97) - 48) * 1.55;
         const yJitter = edgeY ? 0 : (((row * 29 + column * 53) % 83) - 41) * 1.65;
-        return [column * (width / columns) + xJitter, row * (height / rows) + yJitter];
+        return [xLines[column] + xJitter, yLines[row] + yJitter];
       })
-    ), [columns, rows]);
-  const [nodes, setNodes] = useState(baseNodes);
-  const targetRef = useRef({ x: width / 2, y: height / 2, active: false });
-  const currentRef = useRef({ x: width / 2, y: height / 2, strength: 0 });
+    );
+  }, [columns, rows]);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [nodes, setNodes] = useState(() => layoutFor(0));
+  const nodesRef = useRef(nodes);
 
   useEffect(() => {
-    let frame;
-    const animate = () => {
-      const current = currentRef.current;
-      const target = targetRef.current;
-      current.x += (target.x - current.x) * 0.055;
-      current.y += (target.y - current.y) * 0.055;
-      current.strength += ((target.active ? 1 : 0) - current.strength) * 0.045;
-      const radius = Math.max(width / columns, height / rows) * 1.45;
-      setNodes(baseNodes.map((line, row) => line.map((point, column) => {
-        if (row === 0 || row === rows || column === 0 || column === columns) return point;
-        const dx = point[0] - current.x;
-        const dy = point[1] - current.y;
-        const distance = Math.hypot(dx, dy) || 1;
-        const influence = Math.max(0, 1 - distance / radius) ** 2 * current.strength;
-        return [point[0] + (dx / distance) * 62 * influence, point[1] + (dy / distance) * 48 * influence];
-      })));
-      frame = requestAnimationFrame(animate);
+    const from = nodesRef.current;
+    const target = layoutFor(heroIndex);
+    const started = performance.now();
+    let frame = 0;
+    const animate = (now) => {
+      const progress = Math.min(1, (now - started) / 950);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const next = from.map((line, row) => line.map((point, column) => [
+        point[0] + (target[row][column][0] - point[0]) * eased,
+        point[1] + (target[row][column][1] - point[1]) * eased,
+      ]));
+      nodesRef.current = next;
+      setNodes(next);
+      if (progress < 1) frame = requestAnimationFrame(animate);
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-  }, [baseNodes, columns, rows]);
+  }, [heroIndex, layoutFor]);
 
   const points = useMemo(() => {
     return project.photos.map((_, index) => {
@@ -1149,26 +1152,13 @@ const MosaicGallery = ({ project, onSelect }) => {
     });
   }, [columns, project.photos, nodes]);
 
-  const followPointer = useCallback((event) => {
-    const svg = svgRef.current;
-    if (!svg) return;
-    const rect = svg.getBoundingClientRect();
-    targetRef.current = {
-      x: ((event.clientX - rect.left) / rect.width) * width,
-      y: ((event.clientY - rect.top) / rect.height) * height,
-      active: true,
-    };
-  }, []);
-
   return (
     <svg
-      ref={svgRef}
       className="mosaic-gallery"
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
       aria-label={`${project.title} photo mosaic`}
-      onPointerMove={followPointer}
-      onPointerLeave={() => { targetRef.current = { ...targetRef.current, active: false }; }}
+      data-hero-index={heroIndex}
     >
       <defs>
         {points.map((polygon, index) => (
@@ -1187,11 +1177,13 @@ const MosaicGallery = ({ project, onSelect }) => {
         const cellHeight = Math.max(...ys) - y;
         return (
           <g
-            className="mosaic-piece"
+            className={`mosaic-piece${heroIndex === index ? ' mosaic-piece--hero' : ''}`}
             key={src}
             role="button"
             tabIndex="0"
             aria-label={`View image ${index + 1} from ${project.title}`}
+            onPointerEnter={() => setHeroIndex(index)}
+            onFocus={() => setHeroIndex(index)}
             onClick={() => onSelect(index)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
@@ -1702,9 +1694,10 @@ export default function HenryKacikSite() {
   const [lxMode, setLxMode] = useState(true);
   const cueRef = useRef(1);
   const [preFade, setPreFade] = useState(false);
-  const [showCue, setShowCue] = useState(true);
+  const [showCue, setShowCue] = useState(false);
   const [cueNumber, setCueNumber] = useState(1);
   const [renderRoute, setRenderRoute] = useState(currentRoute);
+  const previousRouteRef = useRef(currentRoute);
   const mainRef = useRef(null);
   useEffect(() => { injectFonts(); }, []);
   // Inject project schema once on mount
@@ -1740,6 +1733,8 @@ export default function HenryKacikSite() {
   }, []);
   // Route transition
   useEffect(() => {
+    if (previousRouteRef.current === currentRoute) return;
+    previousRouteRef.current = currentRoute;
     setRenderRoute(currentRoute);
     setPreFade(false);
     if (!lxMode) { setShowCue(false); return; }
@@ -1749,6 +1744,7 @@ export default function HenryKacikSite() {
     const timer = window.setTimeout(() => setShowCue(false), 1100);
     return () => window.clearTimeout(timer);
   }, [currentRoute, lxMode]);
+  useEffect(() => { if (!lxMode) setShowCue(false); }, [lxMode]);
 
   // Dynamic document title
   useEffect(() => {
