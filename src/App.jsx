@@ -1200,7 +1200,8 @@ const MosaicGallery = ({ project, onSelect }) => {
               y={y}
               width={cellWidth}
               height={cellHeight}
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="xMidYMid slice"
+              fetchPriority={index < columns ? 'high' : 'low'}
               clipPath={`url(#mosaic-${project.id}-${index})`}
               onLoad={() => setLoadedImages(previous => {
                 const next = new Set(previous);
@@ -1727,7 +1728,9 @@ export default function HenryKacikSite() {
   }, []);
   // Inject project schema once on mount
   useEffect(() => { try { injectProjectSchema(); } catch {} }, []);
-  // Tamer image preloading: respect Data Saver, only hero + first 2 per project
+  // Warm the small, immediately useful images only. Gallery photographs can be
+  // very large, so downloading several from every project while the browser is
+  // idle competes with the gallery the visitor actually chooses to open.
   useEffect(() => {
     const ric = (typeof window !== 'undefined' && window.requestIdleCallback)
       ? window.requestIdleCallback
@@ -1743,10 +1746,7 @@ export default function HenryKacikSite() {
         img.src = u;
       };
       preload(ABOUT.photo, true);
-      PROJECTS.forEach((p, idx) => {
-        const imgs = [p.hero, ...(p.photos || []).slice(0, 2)];
-        imgs.forEach(u => preload(u, idx === 0)); // only first project eager
-      });
+      preload(PROJECTS[0]?.hero, true);
     });
   }, []);
   const go = useCallback((r) => {
