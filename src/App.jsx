@@ -483,21 +483,13 @@ const useLazyLoad = (options) => {
 };
 
 const CueOverlay = ({ cue }) => (
-  <AnimatePresence>
-    <motion.div key={`cue-${cue}`} initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="pointer-events-none fixed inset-0 z-[60] grid place-items-center bg-black">
+    <motion.div key={`cue-${cue}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="pointer-events-none fixed inset-0 z-[60] grid place-items-center bg-black">
       <motion.div aria-hidden className="absolute inset-0" initial={{ opacity: 0.35, scale: 0.9 }} animate={{ opacity: 0, scale: 1.5 }} transition={{ duration: 1.2, ease: 'easeOut' }} style={{ background: 'radial-gradient(closest-side, rgba(255,255,255,0.08), rgba(255,255,255,0.0) 60%)', mixBlendMode: 'screen' }} />
       <div className="text-center">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 1, 0] }} transition={{ duration: 1.6, times: [0, 0.1, 0.85, 0.95], ease: 'easeInOut' }} className="font-mono text-sm uppercase tracking-[0.35em] text-white/80">Standby LX {cue}.</motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 0, 1, 1, 0] }} transition={{ duration: 1.6, times: [0, 0.2, 0.55, 0.9, 0.98], ease: 'easeInOut' }} className="font-mono text-sm uppercase tracking-[0.35em] text-white mt-2">LX {cue}… Go.</motion.div>
       </div>
     </motion.div>
-  </AnimatePresence>
-);
-
-const PreFadeOverlay = () => (
-  <AnimatePresence>
-    <motion.div key="prefade" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7, ease: 'easeInOut' }} className="pointer-events-none fixed inset-0 z-[55] bg-black" />
-  </AnimatePresence>
 );
 
 const SectionTitle = ({ children }) => {
@@ -1706,11 +1698,10 @@ export default function HenryKacikSite() {
   const { route } = useHashRoute();
   const currentRoute = routeBase(route);
   const [_dark] = useDarkMode();
-  // Smooth crossfades are the professional default; the longer theatrical cue
-  // sequence remains available from the navigation control as an optional mode.
-  const [lxMode, setLxMode] = useState(false);
+  // Start with theatrical cue loading enabled. Route content still mounts and
+  // crossfades immediately behind the cue so neither mode can expose a blank page.
+  const [lxMode, setLxMode] = useState(true);
   const cueRef = useRef(2);
-  const [preFade, setPreFade] = useState(false);
   const [showCue, setShowCue] = useState(false);
   const [cueNumber, setCueNumber] = useState(1);
   const [renderRoute, setRenderRoute] = useState(currentRoute);
@@ -1749,22 +1740,20 @@ export default function HenryKacikSite() {
     if (window.location.hash.slice(1) === r) return;
     // Change the route immediately so navigation can never leave an empty black
     // stage behind. The cue overlay remains a visual layer, not a route gate.
-    setPreFade(false);
     window.location.hash = r;
   }, []);
   // Route transition
   useEffect(() => {
     if (previousRouteRef.current === currentRoute) return;
     previousRouteRef.current = currentRoute;
-    setPreFade(false);
-    if (!lxMode || !hasEnteredRef.current) { setRenderRoute(currentRoute); return; }
+    setRenderRoute(currentRoute);
+    if (!lxMode || !hasEnteredRef.current) return;
     setCueNumber(cueRef.current);
     setShowCue(true);
     cueRef.current += 1;
     const timer = window.setTimeout(() => {
-      setRenderRoute(currentRoute);
       setShowCue(false);
-    }, 1600);
+    }, 1750);
     return () => window.clearTimeout(timer);
   }, [currentRoute, lxMode]);
   useEffect(() => { if (!lxMode) setShowCue(false); }, [lxMode]);
@@ -1790,22 +1779,9 @@ export default function HenryKacikSite() {
       <a href="#main" className="sr-only focus:not-sr-only fixed top-2 left-2 z-[1000] bg-white text-black px-3 py-2 rounded">
   Skip to content
 </a>
-      {lxMode && preFade && <PreFadeOverlay />}
-      {lxMode && showCue && <CueOverlay cue={cueNumber} />}
-      {(
-        lxMode ? (
-          <motion.div initial={{opacity:0}} animate={{opacity: preFade ? 0 : 1}} transition={{ duration: 0.7, ease: 'easeInOut' }}>
-            <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
-            <main id="main" key={renderRoute} ref={mainRef} tabIndex="-1">
-              {renderRoute === "home" && <Hero onSeeWork={onSeeWork} onNavigate={go} />}
-              {renderRoute === "about" && <About onNavigate={go} />}
-              {renderRoute === "portfolio" && <Portfolio />}
-              {renderRoute === "resume" && <Resume />}
-              {renderRoute === "contact" && <Contact /> }
-            </main>
-            <Footer />
-          </motion.div>
-        ) : (
+      <AnimatePresence>
+        {lxMode && showCue && <CueOverlay cue={cueNumber} />}
+      </AnimatePresence>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={renderRoute}
@@ -1826,8 +1802,6 @@ export default function HenryKacikSite() {
               <Footer />
             </motion.div>
           </AnimatePresence>
-        )
-      )}
     </div>
   );
 }
