@@ -25,25 +25,30 @@ img[data-fit="contain"] { width: 100%; height: 100%; object-fit: contain; object
 .stained-gallery {
   position: relative;
   isolation: isolate;
-  background: #f4f4f0;
-  border: 1px solid rgba(255,255,255,.35);
-  border-radius: .35rem;
+  background: #070707;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 0;
   box-shadow: 0 28px 80px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.05);
   overflow: hidden;
   width: 100%;
-  height: max(34rem, calc(100svh - 10.75rem));
+  aspect-ratio: 30 / 19;
+  height: auto;
+  max-height: calc(100svh - 10.75rem);
 }
 
 .gallery-dialog-shell { width: min(100%, 104rem); }
-.mosaic-gallery { display: block; width: 100%; height: 100%; background: #f4f4f0; touch-action: pan-y; }
-.mosaic-piece { cursor: pointer; outline: none; }
+.mosaic-gallery { display: block; width: 100%; height: 100%; background: #070707; touch-action: pan-y; }
+.mosaic-piece { cursor: pointer; outline: none; transform-box: fill-box; transform-origin: center; transition: transform 700ms cubic-bezier(.16,1,.3,1), opacity 500ms ease; }
 .mosaic-piece image { filter: saturate(.92) brightness(.86); transition: filter 900ms cubic-bezier(.16,1,.3,1); }
-.mosaic-piece__edge { fill: transparent; stroke: #f4f4f0; stroke-width: 7; vector-effect: non-scaling-stroke; transition: stroke-width 650ms cubic-bezier(.16,1,.3,1); }
+.mosaic-piece__edge { fill: transparent; stroke: #090909; stroke-width: 10; vector-effect: non-scaling-stroke; transition: stroke 650ms cubic-bezier(.16,1,.3,1), stroke-width 650ms cubic-bezier(.16,1,.3,1); }
+.mosaic-gallery:has(.mosaic-piece:hover) .mosaic-piece:not(:hover) { opacity: .58; transform: scale(.985); }
 .mosaic-gallery:has(.mosaic-piece:hover) .mosaic-piece:not(:hover) image { filter: saturate(.62) brightness(.58); }
 .mosaic-piece:hover image,
 .mosaic-piece:focus-visible image { filter: saturate(1.04) brightness(1.04); }
+.mosaic-piece:hover,
+.mosaic-piece:focus-visible { transform: scale(1.1); }
 .mosaic-piece:hover .mosaic-piece__edge,
-.mosaic-piece:focus-visible .mosaic-piece__edge { stroke: #fff; stroke-width: 11; }
+.mosaic-piece:focus-visible .mosaic-piece__edge { stroke: #fff; stroke-width: 7; }
 
 .stained-gallery__grid {
   display: grid;
@@ -146,22 +151,39 @@ img[data-fit="contain"] { width: 100%; height: 100%; object-fit: contain; object
 
 @media (max-width: 640px) {
   .stained-gallery { border-radius: .25rem; }
-  .stained-gallery { height: max(30rem, calc(100svh - 13.5rem)); }
+  .stained-gallery { aspect-ratio: 4 / 5; max-height: calc(100svh - 13.5rem); }
   .stained-gallery__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 5rem; gap: .4rem; padding: 0; }
   .stained-pane:nth-child(n) { grid-column: span 1; grid-row: span 2; }
   .stained-pane:nth-child(4n + 1) { grid-column: 1 / -1; grid-row: span 3; }
   .stained-gallery__grid:has(.stained-pane:is(:hover, :focus-visible)) .stained-pane:not(:hover):not(:focus-visible) { filter: none; opacity: 1; }
   .stained-pane__number { opacity: .8; transform: none; }
+  .mosaic-piece:hover, .mosaic-piece:focus-visible { transform: scale(1.045); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mosaic-piece image,
+  .mosaic-piece,
   .mosaic-piece__edge,
   .stained-pane,
   .stained-pane img { transition: none; }
   .stained-pane:hover,
   .stained-pane:focus-visible { transform: none; }
 }
+
+/* --- shared editorial language across primary pages --- */
+.editorial-page { min-height: calc(100svh - 4rem); background: #050505; color: #fff; }
+.editorial-page > h2 { max-width: 64rem; margin-left: auto; margin-right: auto; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,.22); }
+.editorial-page h2,
+.editorial-page h3 { font-weight: 400; letter-spacing: -.025em; }
+.about-page p,
+.resume-page p { color: rgba(255,255,255,.7); }
+.editorial-image { border-top: 1px solid rgba(255,255,255,.3); border-bottom: 1px solid rgba(255,255,255,.3); padding: .65rem 0; }
+.editorial-callout strong { color: #fff; font-weight: 500; }
+.editorial-stat { background: transparent; }
+.editorial-download { background: transparent; }
+.portfolio-page .portfolio-project { border-bottom: 1px solid rgba(255,255,255,.16); }
+.portfolio-page .portfolio-project h2 { font-family: "Fraunces", serif; font-weight: 400; letter-spacing: -.03em; }
+.home-page h1 { max-width: 12ch; font-weight: 400; line-height: .95; letter-spacing: -.04em; }
 
 /* --- contact: restrained editorial directory --- */
 .contact-page { min-height: calc(100svh - 4rem); background: #050505; }

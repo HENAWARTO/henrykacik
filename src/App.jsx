@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Square, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Grid3X3, ArrowUpRight } from "lucide-react";
+import { Play, Square, ChevronLeft, ChevronRight, Instagram, Linkedin, Music2, FileDown, Eye, Printer, CheckCircle2, X, Grid3X3, ArrowUpRight, Sparkles } from "lucide-react";
 
 // ---- GA helper (idempotent) ----------------------------------------------
 if (typeof window !== 'undefined' && !window.__hkTrack) {
@@ -742,7 +742,7 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   useEffect(() => { setShaderReady(false); }, [hero]);
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
+    <section className="home-page relative min-h-[100svh] overflow-hidden bg-black text-white" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)}>
       <motion.img
         key={hero}
         src={hero}
@@ -1165,7 +1165,7 @@ const MosaicGallery = ({ project, onSelect }) => {
       ref={svgRef}
       className="mosaic-gallery"
       viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid meet"
       aria-label={`${project.title} photo mosaic`}
       onPointerMove={followPointer}
       onPointerLeave={() => { targetRef.current = { ...targetRef.current, active: false }; }}
@@ -1309,7 +1309,7 @@ const Portfolio = () => {
     }
   }, [active]);
   return (
-    <section className="w-full">
+    <section className="editorial-page portfolio-page w-full">
       {PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
       <AnimatePresence>
         {active && (
@@ -1426,11 +1426,11 @@ const Portfolio = () => {
 };
 
 const About = ({ onNavigate }) => (
-  <section className="py-24 px-6 bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white">
+  <section className="editorial-page about-page py-28 px-6 bg-black text-white">
     <SectionTitle>About</SectionTitle>
     <div className="mx-auto max-w-5xl grid md:grid-cols-12 gap-10 items-start">
       {/* Headshot / card */}
-      <figure className="md:col-span-5 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 bg-black relative">
+      <figure className="editorial-image md:col-span-5 overflow-hidden bg-black relative">
         <img
           src={ABOUT.photo}
           alt="Headshot of Henry Kacik"
@@ -1470,7 +1470,7 @@ const About = ({ onNavigate }) => (
         )}
 
         {/* Fun callout: spot me in two photos */}
-        <div className="mt-6 flex items-start gap-3 rounded-xl border border-current/15 bg-black/5 dark:bg-white/5 p-4">
+        <div className="editorial-callout mt-8 flex items-start gap-3 border-y border-white/20 py-5">
           <Sparkles className="mt-0.5 h-5 w-5 opacity-80" aria-hidden="true" />
           <p className="text-sm opacity-90">
             I pop up in <strong>two</strong> production photos on this site — see if you can spot me in the{' '}
@@ -1518,7 +1518,7 @@ const Resume = () => {
   }, [preview]);
 
   return (
-    <section className="py-24 px-6 bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white">
+    <section className="editorial-page resume-page py-28 px-6 bg-black text-white">
       <SectionTitle>Résumé</SectionTitle>
       <div className="mx-auto max-w-6xl grid md:grid-cols-12 gap-8">
         {/* Left column: intro + skills */}
@@ -1532,15 +1532,15 @@ const Resume = () => {
               {RESUME_SUMMARY.map((item, i) => <Pill key={i}>{item}</Pill>)}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
-              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/5 p-4">
+              <div className="editorial-stat border-t border-white/20 py-4">
                 <div className="text-xs uppercase tracking-widest opacity-70">Based In</div>
                 <div className="text-sm mt-1">{LINKS.location}</div>
               </div>
-              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/5 p-4">
+              <div className="editorial-stat border-t border-white/20 py-4">
                 <div className="text-xs uppercase tracking-widest opacity-70">Selected Shows</div>
                 <div className="text-sm mt-1">{PROJECTS.length} featured</div>
               </div>
-              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/5 p-4">
+              <div className="editorial-stat border-t border-white/20 py-4">
                 <div className="text-xs uppercase tracking-widest opacity-70">Education</div>
                 <div className="text-sm mt-1">Emerson College</div>
               </div>
@@ -1550,7 +1550,7 @@ const Resume = () => {
 
         {/* Right column: actions card */}
         <div className="md:col-span-5">
-          <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-6">
+          <div className="editorial-download border-y border-white/25 py-6">
             <h3 className="text-base font-semibold mb-3" style={{ fontFamily: '"Fraunces", serif' }}>Get the PDF</h3>
             <p className="text-sm opacity-85 mb-4">Preview in your browser or download a copy.</p>
             <div className="flex flex-wrap gap-3">
@@ -1731,17 +1731,23 @@ export default function HenryKacikSite() {
       });
     });
   }, []);
-  const go = useCallback((r) => { if (window.location.hash.slice(1) === r) return; if (lxMode) { setPreFade(true); setRenderRoute(currentRoute); setTimeout(() => { window.location.hash = r; }, 700); } else { setPreFade(false); window.location.hash = r; } }, [currentRoute, lxMode]);
+  const go = useCallback((r) => {
+    if (window.location.hash.slice(1) === r) return;
+    // Change the route immediately so navigation can never leave an empty black
+    // stage behind. The cue overlay remains a visual layer, not a route gate.
+    setPreFade(false);
+    window.location.hash = r;
+  }, []);
   // Route transition
   useEffect(() => {
-    if (lxMode) {
-      setCueNumber(cueRef.current);
-      const t0 = setTimeout(() => setShowCue(true), 40);
-      const t1 = setTimeout(() => { setShowCue(false); setRenderRoute(currentRoute); }, 40 + 1600);
-      const t2 = setTimeout(() => setPreFade(false), 40 + 1600 + 100);
-      cueRef.current = cueRef.current + 1;
-      return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); };
-    } else { setShowCue(false); setPreFade(false); setRenderRoute(currentRoute); }
+    setRenderRoute(currentRoute);
+    setPreFade(false);
+    if (!lxMode) { setShowCue(false); return; }
+    setCueNumber(cueRef.current);
+    setShowCue(true);
+    cueRef.current += 1;
+    const timer = window.setTimeout(() => setShowCue(false), 1100);
+    return () => window.clearTimeout(timer);
   }, [currentRoute, lxMode]);
 
   // Dynamic document title
@@ -1764,7 +1770,7 @@ export default function HenryKacikSite() {
 </a>
       {lxMode && preFade && <PreFadeOverlay />}
       {lxMode && showCue && <CueOverlay cue={cueNumber} />}
-      {(!showCue) && (
+      {(
         lxMode ? (
           <motion.div initial={{opacity:0}} animate={{opacity: preFade ? 0 : 1}} transition={{ duration: 0.7, ease: 'easeInOut' }}>
             <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
