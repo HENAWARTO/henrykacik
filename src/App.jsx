@@ -484,7 +484,7 @@ const useLazyLoad = (options) => {
 
 const CueOverlay = ({ cue }) => (
   <AnimatePresence>
-    <motion.div key={`cue-${cue}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="pointer-events-none fixed inset-0 z-[60] grid place-items-center bg-black/82">
+    <motion.div key={`cue-${cue}`} initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="pointer-events-none fixed inset-0 z-[60] grid place-items-center bg-black">
       <motion.div aria-hidden className="absolute inset-0" initial={{ opacity: 0.35, scale: 0.9 }} animate={{ opacity: 0, scale: 1.5 }} transition={{ duration: 1.2, ease: 'easeOut' }} style={{ background: 'radial-gradient(closest-side, rgba(255,255,255,0.08), rgba(255,255,255,0.0) 60%)', mixBlendMode: 'screen' }} />
       <div className="text-center">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 1, 0] }} transition={{ duration: 1.6, times: [0, 0.1, 0.85, 0.95], ease: 'easeInOut' }} className="font-mono text-sm uppercase tracking-[0.35em] text-white/80">Standby LX {cue}.</motion.div>
@@ -1044,6 +1044,7 @@ const ProjectCard = ({ project }) => {
   const opts = useMemo(() => ({ threshold: 0.2 }), []);
   const [ref, visible] = useLazyLoad(opts);
   const [ratioStr, setRatioStr] = useState('16 / 9');
+  const [imageLoaded, setImageLoaded] = useState(false);
   const open = useCallback(() => { const ev = new CustomEvent('openGallery', { detail: project }); window.dispatchEvent(ev); }, [project]);
   return (
     <div ref={ref} className="portfolio-project relative flex flex-col md:grid md:grid-cols-12">
@@ -1053,8 +1054,8 @@ const ProjectCard = ({ project }) => {
 >
   {visible && (
     <motion.img
-      initial={{opacity:0, scale:1.02}}
-      animate={{opacity:1, scale:1}}
+      initial={false}
+      animate={{opacity:imageLoaded ? 1 : 0, scale:imageLoaded ? 1 : 1.015}}
       transition={{duration:0.7, ease:'easeOut'}}
       src={project.hero}
       alt={project.captions?.[0] || project.title}
@@ -1068,6 +1069,7 @@ const ProjectCard = ({ project }) => {
         const w = e.target.naturalWidth || 16;
         const h = e.target.naturalHeight || 9;
           setRatioStr(`${w} / ${h}`);
+          setImageLoaded(true);
         }}
       />
     )}
@@ -1104,8 +1106,9 @@ const MosaicGallery = ({ project, onSelect }) => {
   const layoutFor = useCallback((heroIndex) => {
     const heroRow = Math.floor(heroIndex / columns);
     const heroColumn = heroIndex % columns;
-    const columnWeights = Array.from({ length: columns }, (_, column) => column === heroColumn ? 1.85 : 1);
-    const rowWeights = Array.from({ length: rows }, (_, row) => row === heroRow ? 1.7 : 1);
+    const hasHero = heroIndex !== null;
+    const columnWeights = Array.from({ length: columns }, (_, column) => hasHero && column === heroColumn ? 1.85 : 1);
+    const rowWeights = Array.from({ length: rows }, (_, row) => hasHero && row === heroRow ? 1.7 : 1);
     const columnTotal = columnWeights.reduce((sum, value) => sum + value, 0);
     const rowTotal = rowWeights.reduce((sum, value) => sum + value, 0);
     const xLines = columnWeights.reduce((lines, value) => [...lines, lines.at(-1) + width * value / columnTotal], [0]);
@@ -1120,8 +1123,9 @@ const MosaicGallery = ({ project, onSelect }) => {
       })
     );
   }, [columns, rows]);
-  const [heroIndex, setHeroIndex] = useState(0);
-  const [nodes, setNodes] = useState(() => layoutFor(0));
+  const [heroIndex, setHeroIndex] = useState(null);
+  const [loadedImages, setLoadedImages] = useState(() => new Set());
+  const [nodes, setNodes] = useState(() => layoutFor(null));
   const nodesRef = useRef(nodes);
 
   useEffect(() => {
@@ -1158,7 +1162,8 @@ const MosaicGallery = ({ project, onSelect }) => {
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
       aria-label={`${project.title} photo mosaic`}
-      data-hero-index={heroIndex}
+      data-hero-index={heroIndex ?? ''}
+      onPointerLeave={() => setHeroIndex(null)}
     >
       <defs>
         {points.map((polygon, index) => (
@@ -1193,13 +1198,19 @@ const MosaicGallery = ({ project, onSelect }) => {
             }}
           >
             <image
+              className={loadedImages.has(index) ? 'is-loaded' : ''}
               href={src}
               x={x}
               y={y}
               width={cellWidth}
               height={cellHeight}
-              preserveAspectRatio="xMidYMid slice"
+              preserveAspectRatio="xMidYMid meet"
               clipPath={`url(#mosaic-${project.id}-${index})`}
+              onLoad={() => setLoadedImages(previous => {
+                const next = new Set(previous);
+                next.add(index);
+                return next;
+              })}
             />
             <polygon className="mosaic-piece__edge" points={polygon.map(point => point.join(',')).join(' ')} />
           </g>
@@ -1692,14 +1703,24 @@ export default function HenryKacikSite() {
   const currentRoute = routeBase(route);
   const [_dark] = useDarkMode();
   const [lxMode, setLxMode] = useState(true);
-  const cueRef = useRef(1);
+  const cueRef = useRef(2);
   const [preFade, setPreFade] = useState(false);
-  const [showCue, setShowCue] = useState(false);
+  const [showCue, setShowCue] = useState(true);
   const [cueNumber, setCueNumber] = useState(1);
   const [renderRoute, setRenderRoute] = useState(currentRoute);
   const previousRouteRef = useRef(currentRoute);
+  const hasEnteredRef = useRef(false);
   const mainRef = useRef(null);
   useEffect(() => { injectFonts(); }, []);
+  // Start every visit on a true blackout, then call the first cue before the
+  // site is revealed. This is deliberately independent of image loading.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      hasEnteredRef.current = true;
+      setShowCue(false);
+    }, 1600);
+    return () => window.clearTimeout(timer);
+  }, []);
   // Inject project schema once on mount
   useEffect(() => { try { injectProjectSchema(); } catch {} }, []);
   // Tamer image preloading: respect Data Saver, only hero + first 2 per project
@@ -1735,13 +1756,15 @@ export default function HenryKacikSite() {
   useEffect(() => {
     if (previousRouteRef.current === currentRoute) return;
     previousRouteRef.current = currentRoute;
-    setRenderRoute(currentRoute);
     setPreFade(false);
-    if (!lxMode) { setShowCue(false); return; }
+    if (!lxMode || !hasEnteredRef.current) { setRenderRoute(currentRoute); return; }
     setCueNumber(cueRef.current);
     setShowCue(true);
     cueRef.current += 1;
-    const timer = window.setTimeout(() => setShowCue(false), 1100);
+    const timer = window.setTimeout(() => {
+      setRenderRoute(currentRoute);
+      setShowCue(false);
+    }, 1600);
     return () => window.clearTimeout(timer);
   }, [currentRoute, lxMode]);
   useEffect(() => { if (!lxMode) setShowCue(false); }, [lxMode]);
