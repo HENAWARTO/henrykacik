@@ -1091,6 +1091,84 @@ const ProjectCard = ({ project }) => {
   );
 };
 
+const mosaicColumns = (count) => {
+  if (count % 5 === 0) return 5;
+  if (count % 4 === 0) return 4;
+  if (count % 3 === 0) return 3;
+  return Math.min(count, 5);
+};
+
+const MosaicGallery = ({ project, onSelect }) => {
+  const columns = mosaicColumns(project.photos.length);
+  const rows = Math.ceil(project.photos.length / columns);
+  const width = 1200;
+  const height = rows * 285;
+  const points = useMemo(() => {
+    const nodes = Array.from({ length: rows + 1 }, (_, row) =>
+      Array.from({ length: columns + 1 }, (_, column) => {
+        const edgeX = column === 0 || column === columns;
+        const edgeY = row === 0 || row === rows;
+        const xJitter = edgeX ? 0 : (((row * 47 + column * 31) % 97) - 48) * 0.72;
+        const yJitter = edgeY ? 0 : (((row * 29 + column * 53) % 83) - 41) * 0.9;
+        return [column * (width / columns) + xJitter, row * (height / rows) + yJitter];
+      })
+    );
+    return project.photos.map((_, index) => {
+      const row = Math.floor(index / columns);
+      const column = index % columns;
+      return [nodes[row][column], nodes[row][column + 1], nodes[row + 1][column + 1], nodes[row + 1][column]];
+    });
+  }, [columns, project.photos, rows, height]);
+
+  return (
+    <svg className="mosaic-gallery" viewBox={`0 0 ${width} ${height}`} aria-label={`${project.title} photo mosaic`}>
+      <defs>
+        {points.map((polygon, index) => (
+          <clipPath id={`mosaic-${project.id}-${index}`} key={index}>
+            <polygon points={polygon.map(point => point.join(',')).join(' ')} />
+          </clipPath>
+        ))}
+      </defs>
+      {project.photos.map((src, index) => {
+        const polygon = points[index];
+        const xs = polygon.map(([x]) => x);
+        const ys = polygon.map(([, y]) => y);
+        const x = Math.min(...xs);
+        const y = Math.min(...ys);
+        const cellWidth = Math.max(...xs) - x;
+        const cellHeight = Math.max(...ys) - y;
+        return (
+          <g
+            className="mosaic-piece"
+            key={src}
+            role="button"
+            tabIndex="0"
+            aria-label={`View image ${index + 1} from ${project.title}`}
+            onClick={() => onSelect(index)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onSelect(index);
+              }
+            }}
+          >
+            <image
+              href={src}
+              x={x}
+              y={y}
+              width={cellWidth}
+              height={cellHeight}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath={`url(#mosaic-${project.id}-${index})`}
+            />
+            <polygon className="mosaic-piece__edge" points={polygon.map(point => point.join(',')).join(' ')} />
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
 const Portfolio = () => {
   const [active, setActive] = useState(null);
   const [idx, setIdx] = useState(null);
@@ -1249,31 +1327,14 @@ const Portfolio = () => {
                   animate={{opacity:1, y:0}}
                   transition={{duration:0.45}}
                   className="stained-gallery"
-                  style={{ '--pane-count': active.photos.length }}
                 >
-                  <div className="stained-gallery__grid">
-                    {active.photos.map((src, photoIdx) => (
-                      <motion.button
-                        key={src}
-                        initial={{ opacity: 0, scale: 0.985 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.7, delay: Math.min(photoIdx * 0.045, 0.4), ease: [0.16, 1, 0.3, 1] }}
-                        onClick={() => { setIdx(photoIdx); track('gallery_select_image', { project_id: active.id, idx: photoIdx }); }}
-                        className="stained-pane group"
-                        aria-label={`View image ${photoIdx + 1} from ${active.title}`}
-                      >
-                        <img
-                          src={src}
-                          alt={active.captions?.[photoIdx] || `${active.title} production photo ${photoIdx + 1}`}
-                          loading={photoIdx < 4 ? "eager" : "lazy"}
-                          decoding="async"
-                          fetchpriority={photoIdx < 2 ? "high" : "low"}
-                          sizes="(min-width: 900px) 38vw, (min-width: 640px) 50vw, 100vw"
-                        />
-                        <span className="stained-pane__number" aria-hidden="true">{String(photoIdx + 1).padStart(2, '0')}</span>
-                      </motion.button>
-                    ))}
-                  </div>
+                  <MosaicGallery
+                    project={active}
+                    onSelect={(photoIdx) => {
+                      setIdx(photoIdx);
+                      track('gallery_select_image', { project_id: active.id, idx: photoIdx });
+                    }}
+                  />
                 </motion.div>
               ) : (
                 <>
