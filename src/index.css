@@ -7,6 +7,15 @@ html, body, #root {
   scroll-behavior: smooth;
 }
 
+body {
+  margin: 0;
+  background: #000;
+}
+
+/* Keep page swaps and decoded imagery on their own compositor layers. */
+.page-transition { will-change: opacity, transform; }
+img { transition: opacity 500ms cubic-bezier(.22,1,.36,1); }
+
 img {
   image-orientation: from-image;
 }
@@ -158,6 +167,9 @@ img[data-fit="contain"] { width: 100%; height: 100%; object-fit: contain; object
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html, body, #root { scroll-behavior: auto; }
+  .page-transition { will-change: auto; }
+  img { transition: none; }
   .mosaic-piece image,
   .mosaic-piece,
   .mosaic-piece__edge,
