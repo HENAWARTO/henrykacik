@@ -1099,29 +1099,77 @@ const mosaicColumns = (count) => {
 };
 
 const MosaicGallery = ({ project, onSelect }) => {
+  const svgRef = useRef(null);
   const columns = mosaicColumns(project.photos.length);
   const rows = Math.ceil(project.photos.length / columns);
   const width = 1200;
-  const height = rows * 285;
-  const points = useMemo(() => {
-    const nodes = Array.from({ length: rows + 1 }, (_, row) =>
+  const height = 760;
+  const baseNodes = useMemo(() =>
+    Array.from({ length: rows + 1 }, (_, row) =>
       Array.from({ length: columns + 1 }, (_, column) => {
         const edgeX = column === 0 || column === columns;
         const edgeY = row === 0 || row === rows;
-        const xJitter = edgeX ? 0 : (((row * 47 + column * 31) % 97) - 48) * 0.72;
-        const yJitter = edgeY ? 0 : (((row * 29 + column * 53) % 83) - 41) * 0.9;
+        const xJitter = edgeX ? 0 : (((row * 47 + column * 31) % 97) - 48) * 1.55;
+        const yJitter = edgeY ? 0 : (((row * 29 + column * 53) % 83) - 41) * 1.65;
         return [column * (width / columns) + xJitter, row * (height / rows) + yJitter];
       })
-    );
+    ), [columns, rows]);
+  const [nodes, setNodes] = useState(baseNodes);
+  const targetRef = useRef({ x: width / 2, y: height / 2, active: false });
+  const currentRef = useRef({ x: width / 2, y: height / 2, strength: 0 });
+
+  useEffect(() => {
+    let frame;
+    const animate = () => {
+      const current = currentRef.current;
+      const target = targetRef.current;
+      current.x += (target.x - current.x) * 0.055;
+      current.y += (target.y - current.y) * 0.055;
+      current.strength += ((target.active ? 1 : 0) - current.strength) * 0.045;
+      const radius = Math.max(width / columns, height / rows) * 1.45;
+      setNodes(baseNodes.map((line, row) => line.map((point, column) => {
+        if (row === 0 || row === rows || column === 0 || column === columns) return point;
+        const dx = point[0] - current.x;
+        const dy = point[1] - current.y;
+        const distance = Math.hypot(dx, dy) || 1;
+        const influence = Math.max(0, 1 - distance / radius) ** 2 * current.strength;
+        return [point[0] + (dx / distance) * 62 * influence, point[1] + (dy / distance) * 48 * influence];
+      })));
+      frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [baseNodes, columns, rows]);
+
+  const points = useMemo(() => {
     return project.photos.map((_, index) => {
       const row = Math.floor(index / columns);
       const column = index % columns;
       return [nodes[row][column], nodes[row][column + 1], nodes[row + 1][column + 1], nodes[row + 1][column]];
     });
-  }, [columns, project.photos, rows, height]);
+  }, [columns, project.photos, nodes]);
+
+  const followPointer = useCallback((event) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
+    targetRef.current = {
+      x: ((event.clientX - rect.left) / rect.width) * width,
+      y: ((event.clientY - rect.top) / rect.height) * height,
+      active: true,
+    };
+  }, []);
 
   return (
-    <svg className="mosaic-gallery" viewBox={`0 0 ${width} ${height}`} aria-label={`${project.title} photo mosaic`}>
+    <svg
+      ref={svgRef}
+      className="mosaic-gallery"
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="none"
+      aria-label={`${project.title} photo mosaic`}
+      onPointerMove={followPointer}
+      onPointerLeave={() => { targetRef.current = { ...targetRef.current, active: false }; }}
+    >
       <defs>
         {points.map((polygon, index) => (
           <clipPath id={`mosaic-${project.id}-${index}`} key={index}>
@@ -1281,7 +1329,7 @@ const Portfolio = () => {
               }
             }}
           >
-            <div className="max-w-6xl mx-auto">
+            <div className="gallery-dialog-shell mx-auto">
               <div className="sticky top-0 z-10 mb-5 flex flex-col gap-3 text-white bg-black/95 pb-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="max-w-3xl">
                   <div className="text-xs uppercase tracking-[0.2em] opacity-80">{active.role} — {active.year}</div>
