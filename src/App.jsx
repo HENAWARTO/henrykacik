@@ -1702,9 +1702,11 @@ export default function HenryKacikSite() {
   // crossfades immediately behind the cue so neither mode can expose a blank page.
   const [lxMode, setLxMode] = useState(true);
   const cueRef = useRef(2);
-  const [showCue, setShowCue] = useState(true);
+  // The first cue lives in index.html so it appears before this JavaScript
+  // bundle loads. React owns subsequent route cues only.
+  const [showCue, setShowCue] = useState(false);
   const [cueNumber, setCueNumber] = useState(1);
-  const [openingCue, setOpeningCue] = useState(true);
+  const [openingCue, setOpeningCue] = useState(false);
   const [renderRoute, setRenderRoute] = useState(currentRoute);
   const previousRouteRef = useRef(currentRoute);
   const hasEnteredRef = useRef(false);
@@ -1712,11 +1714,16 @@ export default function HenryKacikSite() {
   useEffect(() => { injectFonts(); }, []);
   useEffect(() => {
     hasEnteredRef.current = true;
-    const timer = window.setTimeout(() => {
-      setShowCue(false);
-      setOpeningCue(false);
-    }, 1750);
-    return () => window.clearTimeout(timer);
+    const openingCue = document.getElementById('opening-cue');
+    if (!openingCue) return;
+    const startedAt = window.__hkOpeningCueStarted ?? performance.now();
+    const remaining = Math.max(0, 1750 - (performance.now() - startedAt));
+    const exitTimer = window.setTimeout(() => openingCue.classList.add('is-exiting'), remaining);
+    const removeTimer = window.setTimeout(() => openingCue.remove(), remaining + 400);
+    return () => {
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(removeTimer);
+    };
   }, []);
   // Inject project schema once on mount
   useEffect(() => { try { injectProjectSchema(); } catch {} }, []);
