@@ -759,13 +759,13 @@ const Hero = ({ onSeeWork, onNavigate }) => {
       {!prefersReduced && !coarsePointer && (
    <AnimatePresence initial={false}>
      <motion.div
-       key={`${heroIdx}-${shaderReady ? 'ready' : 'loading'}`}
+       key={hero}
        className="absolute inset-0"
        initial={{ opacity: 0 }}
        animate={{ opacity: shaderReady ? 1 : 0 }}
        exit={{ opacity: 0 }}
        transition={{ duration: 1.2, ease: "easeInOut" }}
-       style={{ pointerEvents: 'none' }}   // let clicks hit the buttons below
+       style={{ pointerEvents: 'none' }}
      >
        <ParticleHero
          imageUrl={hero}
@@ -821,9 +821,11 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         // Capability gating (keep it light; avoid importing three unless we pass)
         const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
         const coarsePointer  = window.matchMedia?.('(pointer: coarse)')?.matches;
-        const cores = navigator.hardwareConcurrency || 4;
-        const memoryGB = navigator.deviceMemory || 4;
-        const enableFx = !prefersReduced && !coarsePointer && cores >= 6 && memoryGB >= 4;
+        // The effect is progressively enhanced for precise pointers. Do not gate
+        // it on hardwareConcurrency/deviceMemory: those values are frequently
+        // missing or deliberately reduced by browsers, which made the spotlight
+        // disappear on otherwise capable machines.
+        const enableFx = !prefersReduced && !coarsePointer;
 
         if (!enableFx) {
           onError?.();
@@ -972,9 +974,11 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
           }
         };
         const onLeave = () => { mouseRef.current.target = 0; };
-        container.addEventListener('pointermove', onPointer, { passive: true });
-        container.addEventListener('pointerdown', onPointer, { passive: true });
-        container.addEventListener('pointerleave', onLeave);
+        // The canvas is pointer-events:none so it never blocks the hero controls.
+        // Listen on the window and map the pointer back into the hero instead.
+        window.addEventListener('pointermove', onPointer, { passive: true });
+        window.addEventListener('pointerdown', onPointer, { passive: true });
+        window.addEventListener('pointerleave', onLeave, { passive: true });
 
         let start;
         const tick = () => {
@@ -1015,9 +1019,9 @@ const ParticleHero = ({ imageUrl, onReady, onError }) => {
         cleanup = () => {
           if (animRef.current) cancelAnimationFrame(animRef.current);
           window.removeEventListener('resize', onResize);
-          container.removeEventListener('pointermove', onPointer);
-          container.removeEventListener('pointerdown', onPointer);
-          container.removeEventListener('pointerleave', onLeave);
+          window.removeEventListener('pointermove', onPointer);
+          window.removeEventListener('pointerdown', onPointer);
+          window.removeEventListener('pointerleave', onLeave);
           document.removeEventListener('visibilitychange', onVis);
           observer.disconnect();
           mat.dispose();
@@ -1702,24 +1706,20 @@ export default function HenryKacikSite() {
   const { route } = useHashRoute();
   const currentRoute = routeBase(route);
   const [_dark] = useDarkMode();
-  const [lxMode, setLxMode] = useState(true);
+  // Smooth crossfades are the professional default; the longer theatrical cue
+  // sequence remains available from the navigation control as an optional mode.
+  const [lxMode, setLxMode] = useState(false);
   const cueRef = useRef(2);
   const [preFade, setPreFade] = useState(false);
-  const [showCue, setShowCue] = useState(true);
+  const [showCue, setShowCue] = useState(false);
   const [cueNumber, setCueNumber] = useState(1);
   const [renderRoute, setRenderRoute] = useState(currentRoute);
   const previousRouteRef = useRef(currentRoute);
   const hasEnteredRef = useRef(false);
   const mainRef = useRef(null);
   useEffect(() => { injectFonts(); }, []);
-  // Start every visit on a true blackout, then call the first cue before the
-  // site is revealed. This is deliberately independent of image loading.
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      hasEnteredRef.current = true;
-      setShowCue(false);
-    }, 1600);
-    return () => window.clearTimeout(timer);
+    hasEnteredRef.current = true;
   }, []);
   // Inject project schema once on mount
   useEffect(() => { try { injectProjectSchema(); } catch {} }, []);
@@ -1780,7 +1780,10 @@ export default function HenryKacikSite() {
   }, [renderRoute]);
 
   // Focus main on route changes
-  useEffect(() => { mainRef.current?.focus?.(); }, [renderRoute]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    mainRef.current?.focus?.({ preventScroll: true });
+  }, [renderRoute]);
   const onSeeWork = useCallback(() => go("portfolio"), [go]);
   return (
     <div className="min-h-screen bg-black text-white" style={{ fontFamily: 'Jost, Futura, "Century Gothic", system-ui, sans-serif' }}>
@@ -1803,8 +1806,15 @@ export default function HenryKacikSite() {
             <Footer />
           </motion.div>
         ) : (
-          <AnimatePresence mode="wait">
-            <motion.div key={renderRoute} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.6, ease:'easeInOut'}}>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={renderRoute}
+              className="page-transition"
+              initial={{opacity:0, y:8}}
+              animate={{opacity:1, y:0}}
+              exit={{opacity:0, y:-4}}
+              transition={{duration:0.38, ease:[0.22, 1, 0.36, 1]}}
+            >
               <Nav route={renderRoute} onNav={go} lxMode={lxMode} setLxMode={setLxMode} />
               <main id="main" ref={mainRef} tabIndex="-1">
                 {renderRoute === "home" && <Hero onSeeWork={onSeeWork} onNavigate={go} />}
