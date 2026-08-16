@@ -10,6 +10,11 @@ permissions:
   pages: write
   id-token: write
 
+# Run JavaScript actions with the runtime that GitHub-hosted runners use after
+# the Node 20 deprecation. This also makes runtime regressions visible now.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -19,12 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install deps
         run: npm install
