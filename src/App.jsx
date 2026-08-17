@@ -1087,138 +1087,30 @@ const ProjectCard = ({ project }) => {
   );
 };
 
-const mosaicColumns = (count) => {
-  if (count % 5 === 0) return 5;
-  if (count % 4 === 0) return 4;
-  if (count % 3 === 0) return 3;
-  return Math.min(count, 5);
-};
-
-const MosaicGallery = ({ project, onSelect }) => {
-  const columns = mosaicColumns(project.photos.length);
-  const rows = Math.ceil(project.photos.length / columns);
-  const width = 1200;
-  const height = 760;
-  const layoutFor = useCallback((heroIndex) => {
-    const heroRow = Math.floor(heroIndex / columns);
-    const heroColumn = heroIndex % columns;
-    const hasHero = heroIndex !== null;
-    // Let the active pane take over the wall rather than merely nudging its
-    // neighbours. The independent row/column expansion keeps the silhouette
-    // fluid while making the highlighted image the clear largest pane.
-    const columnWeights = Array.from({ length: columns }, (_, column) => hasHero && column === heroColumn ? 3.4 : 1);
-    const rowWeights = Array.from({ length: rows }, (_, row) => hasHero && row === heroRow ? 3 : 1);
-    const columnTotal = columnWeights.reduce((sum, value) => sum + value, 0);
-    const rowTotal = rowWeights.reduce((sum, value) => sum + value, 0);
-    const xLines = columnWeights.reduce((lines, value) => [...lines, lines.at(-1) + width * value / columnTotal], [0]);
-    const yLines = rowWeights.reduce((lines, value) => [...lines, lines.at(-1) + height * value / rowTotal], [0]);
-    return Array.from({ length: rows + 1 }, (_, row) =>
-      Array.from({ length: columns + 1 }, (_, column) => {
-        const edgeX = column === 0 || column === columns;
-        const edgeY = row === 0 || row === rows;
-        const xJitter = edgeX ? 0 : (((row * 47 + column * 31) % 97) - 48) * 1.55;
-        const yJitter = edgeY ? 0 : (((row * 29 + column * 53) % 83) - 41) * 1.65;
-        return [xLines[column] + xJitter, yLines[row] + yJitter];
-      })
-    );
-  }, [columns, rows]);
-  const [heroIndex, setHeroIndex] = useState(null);
-  const [loadedImages, setLoadedImages] = useState(() => new Set());
-  const [nodes, setNodes] = useState(() => layoutFor(null));
-  const nodesRef = useRef(nodes);
-
-  useEffect(() => {
-    const from = nodesRef.current;
-    const target = layoutFor(heroIndex);
-    const started = performance.now();
-    let frame = 0;
-    const animate = (now) => {
-      const progress = Math.min(1, (now - started) / 950);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const next = from.map((line, row) => line.map((point, column) => [
-        point[0] + (target[row][column][0] - point[0]) * eased,
-        point[1] + (target[row][column][1] - point[1]) * eased,
-      ]));
-      nodesRef.current = next;
-      setNodes(next);
-      if (progress < 1) frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [heroIndex, layoutFor]);
-
-  const points = useMemo(() => {
-    return project.photos.map((_, index) => {
-      const row = Math.floor(index / columns);
-      const column = index % columns;
-      return [nodes[row][column], nodes[row][column + 1], nodes[row + 1][column + 1], nodes[row + 1][column]];
-    });
-  }, [columns, project.photos, nodes]);
-
-  return (
-    <svg
-      className="mosaic-gallery"
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="xMidYMid meet"
-      aria-label={`${project.title} photo mosaic`}
-      data-hero-index={heroIndex ?? ''}
-      onPointerLeave={() => setHeroIndex(null)}
-    >
-      <defs>
-        {points.map((polygon, index) => (
-          <clipPath id={`mosaic-${project.id}-${index}`} key={index}>
-            <polygon points={polygon.map(point => point.join(',')).join(' ')} />
-          </clipPath>
-        ))}
-      </defs>
-      {project.photos.map((src, index) => {
-        const polygon = points[index];
-        const xs = polygon.map(([x]) => x);
-        const ys = polygon.map(([, y]) => y);
-        const x = Math.min(...xs);
-        const y = Math.min(...ys);
-        const cellWidth = Math.max(...xs) - x;
-        const cellHeight = Math.max(...ys) - y;
-        return (
-          <g
-            className={`mosaic-piece${heroIndex === index ? ' mosaic-piece--hero' : ''}`}
-            key={src}
-            role="button"
-            tabIndex="0"
-            aria-label={`View image ${index + 1} from ${project.title}`}
-            onPointerEnter={() => setHeroIndex(index)}
-            onFocus={() => setHeroIndex(index)}
-            onClick={() => onSelect(index)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                onSelect(index);
-              }
-            }}
-          >
-            <image
-              className={loadedImages.has(index) ? 'is-loaded' : ''}
-              href={src}
-              x={x}
-              y={y}
-              width={cellWidth}
-              height={cellHeight}
-              preserveAspectRatio="xMidYMid meet"
-              fetchPriority={index < columns ? 'high' : 'low'}
-              clipPath={`url(#mosaic-${project.id}-${index})`}
-              onLoad={() => setLoadedImages(previous => {
-                const next = new Set(previous);
-                next.add(index);
-                return next;
-              })}
-            />
-            <polygon className="mosaic-piece__edge" points={polygon.map(point => point.join(',')).join(' ')} />
-          </g>
-        );
-      })}
-    </svg>
-  );
-};
+const GalleryGrid = ({ project, onSelect }) => (
+  <div className="gallery-grid" aria-label={`${project.title} photographs`}>
+    {project.photos.map((src, index) => (
+      <button
+        type="button"
+        className="gallery-thumbnail group"
+        key={src}
+        aria-label={`View image ${index + 1} of ${project.photos.length} from ${project.title}`}
+        onClick={() => onSelect(index)}
+      >
+        <img
+          src={src}
+          alt={project.captions?.[index] || `${project.title}, photograph ${index + 1}`}
+          loading={index < 6 ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchpriority={index < 3 ? 'high' : 'low'}
+        />
+        <span className="gallery-thumbnail__index" aria-hidden="true">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+      </button>
+    ))}
+  </div>
+);
 
 const Portfolio = () => {
   const [active, setActive] = useState(null);
@@ -1377,9 +1269,9 @@ const Portfolio = () => {
                   initial={{opacity:0, y:12}}
                   animate={{opacity:1, y:0}}
                   transition={{duration:0.45}}
-                  className="stained-gallery"
+                  className="gallery-overview"
                 >
-                  <MosaicGallery
+                  <GalleryGrid
                     project={active}
                     onSelect={(photoIdx) => {
                       setIdx(photoIdx);
