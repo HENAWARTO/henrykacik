@@ -30,13 +30,23 @@ img, video, canvas {
 img[data-fit="cover"]   { width: 100%; height: 100%; object-fit: cover;  object-position: center; }
 img[data-fit="contain"] { width: 100%; height: 100%; object-fit: contain; object-position: center; }
 
-/* --- portfolio gallery: a straightforward, image-first contact sheet --- */
-.gallery-dialog-shell { width: min(100%, 96rem); }
-.gallery-overview { padding-bottom: 2rem; }
+/* --- portfolio gallery: a scrollable, image-first contact sheet --- */
+.gallery-dialog {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.gallery-dialog-shell { width: min(100%, 96rem); min-height: 100%; }
+.gallery-overview { padding-bottom: clamp(3rem, 8vh, 7rem); }
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(.75rem, 1.5vw, 1.5rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 2rem);
 }
 .gallery-thumbnail {
   position: relative;
@@ -70,12 +80,8 @@ img[data-fit="contain"] { width: 100%; height: 100%; object-fit: contain; object
 /* Keep off-screen portfolio sections out of the initial layout/paint budget. */
 .portfolio-project { content-visibility: auto; contain-intrinsic-size: auto 760px; }
 
-@media (max-width: 900px) {
-  .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 640px) {
-  .gallery-grid { grid-template-columns: 1fr; gap: .75rem; }
+@media (max-width: 720px) {
+  .gallery-grid { grid-template-columns: 1fr; gap: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
