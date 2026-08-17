@@ -700,6 +700,8 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const [heroIdx, setHeroIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [shaderReady, setShaderReady] = useState(false);
+  const [heroLoaded, setHeroLoaded] = useState(false);
+  const [enhanceHero, setEnhanceHero] = useState(false);
   const rawHero = heroFrames[heroIdx]?.src || PROJECTS[0]?.photos?.[0];
   const isHttp = typeof rawHero === 'string' && rawHero.startsWith('http');
   const heroBlocked = isHttp && (rawHero.includes('imgur.com/a/') || rawHero.includes('/gallery/') || rawHero.includes('drive.google.com'));
@@ -721,9 +723,23 @@ const Hero = ({ onSeeWork, onNavigate }) => {
   const handleShaderReady = useCallback(() => setShaderReady(true), []);
   const handleShaderError = useCallback(() => setShaderReady(false), []);
 
-  useEffect(() => { const preload = (u) => { const img = new Image(); img.decoding='async'; img.loading='eager'; img.src=u; }; preload(hero); const nextIdx = (heroIdx + 1) % heroFrames.length; if (heroFrames[nextIdx]) preload(heroFrames[nextIdx].src); }, [hero, heroIdx, heroFrames]);
+  // Let the visible <img> own the initial request. Preloading the current and
+  // next full-resolution photographs here made several multi-megabyte downloads
+  // compete for bandwidth before the first frame had even decoded.
+  useEffect(() => {
+    setHeroLoaded(false);
+    setEnhanceHero(false);
+  }, [hero]);
 
-  useEffect(() => { if (!hero) return; const link = document.createElement('link'); link.rel = 'preload'; link.as = 'image'; link.href = hero; document.head.appendChild(link); return () => { try { document.head.removeChild(link); } catch(e){} }; }, [hero]);
+  // The WebGL treatment decodes the photograph a second time. Defer that work
+  // until after the browser has painted the real image and has an idle moment.
+  useEffect(() => {
+    if (!heroLoaded || prefersReduced || coarsePointer) return;
+    const schedule = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 500));
+    const cancel = window.cancelIdleCallback || window.clearTimeout;
+    const handle = schedule(() => setEnhanceHero(true), { timeout: 1800 });
+    return () => cancel(handle);
+  }, [heroLoaded, prefersReduced, coarsePointer]);
 
   useEffect(() => {
     if (prefersReduced || coarsePointer) return;
@@ -746,9 +762,10 @@ const Hero = ({ onSeeWork, onNavigate }) => {
         style={{ objectFit: fit, objectPosition: 'center', maskImage: 'radial-gradient(circle at center, black 60%, transparent 90%)', WebkitMaskImage: 'radial-gradient(circle at center, black 60%, transparent 90%)' }}
         loading="eager"
         decoding="async"
-        fetchpriority="high"
+        fetchPriority="high"
+        onLoad={() => setHeroLoaded(true)}
       />
-      {!prefersReduced && !coarsePointer && (
+      {enhanceHero && !prefersReduced && !coarsePointer && (
    <AnimatePresence initial={false}>
      <motion.div
        key={hero}
@@ -1059,7 +1076,7 @@ const ProjectCard = ({ project }) => {
       style={{ objectFit: 'contain', objectPosition: 'center' }}
       loading="lazy"
       decoding="async"
-      fetchpriority="low"
+      fetchPriority="low"
       sizes="(min-width: 1024px) 66vw, 100vw"
       onLoad={(e) => {
         const w = e.target.naturalWidth || 16;
@@ -1100,9 +1117,9 @@ const GalleryGrid = ({ project, onSelect }) => (
         <img
           src={src}
           alt={project.captions?.[index] || `${project.title}, photograph ${index + 1}`}
-          loading={index < 6 ? 'eager' : 'lazy'}
+          loading={index === 0 ? 'eager' : 'lazy'}
           decoding="async"
-          fetchpriority={index < 3 ? 'high' : 'low'}
+          fetchPriority={index === 0 ? 'high' : 'low'}
         />
         <span className="gallery-thumbnail__index" aria-hidden="true">
           {String(index + 1).padStart(2, '0')}
@@ -1294,7 +1311,7 @@ const Portfolio = () => {
                           className="max-h-[78svh] w-auto max-w-full object-contain"
                           loading="eager"
                           decoding="async"
-                          fetchpriority="high"
+                          fetchPriority="high"
                           initial={{opacity:0}}
                           animate={{opacity:1}}
                           exit={{opacity:0}}
@@ -1332,7 +1349,7 @@ const About = ({ onNavigate }) => (
           className="w-full h-auto block"
           loading="lazy"
           decoding="async"
-          fetchpriority="low"
+          fetchPriority="low"
           sizes="(min-width: 768px) 40vw, 90vw"
         />
         <figcaption className="sr-only">Brooklyn-based lighting designer, theatre/concerts/events.</figcaption>
