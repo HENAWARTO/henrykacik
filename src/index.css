@@ -51,10 +51,10 @@ img[data-fit="contain"] { width: 100%; height: 100%; object-fit: contain; object
 .mosaic-piece image { opacity: 0; filter: saturate(.72) brightness(.62); transition: opacity 650ms ease, filter 900ms cubic-bezier(.16,1,.3,1); }
 .mosaic-piece image.is-loaded { opacity: 1; }
 .mosaic-piece__edge { fill: transparent; stroke: #090909; stroke-width: 10; vector-effect: non-scaling-stroke; transition: stroke 650ms cubic-bezier(.16,1,.3,1), stroke-width 650ms cubic-bezier(.16,1,.3,1); }
-.mosaic-gallery:has(.mosaic-piece--hero) .mosaic-piece:not(.mosaic-piece--hero) { opacity: .68; }
-.mosaic-gallery:has(.mosaic-piece--hero) .mosaic-piece:not(.mosaic-piece--hero) image { filter: saturate(.7) brightness(.66); }
-.mosaic-piece--hero image { filter: saturate(1.04) brightness(1.04); }
-.mosaic-piece--hero .mosaic-piece__edge { stroke: #090909; stroke-width: 10; }
+.mosaic-gallery:has(.mosaic-piece--hero) .mosaic-piece:not(.mosaic-piece--hero) { opacity: .42; }
+.mosaic-gallery:has(.mosaic-piece--hero) .mosaic-piece:not(.mosaic-piece--hero) image { filter: saturate(.55) brightness(.48); }
+.mosaic-piece--hero image { filter: saturate(1.08) brightness(1.08); }
+.mosaic-piece--hero .mosaic-piece__edge { stroke: rgba(255,255,255,.82); stroke-width: 14; }
 
 .stained-gallery__grid {
   display: grid;

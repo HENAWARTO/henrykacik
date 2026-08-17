@@ -1103,8 +1103,11 @@ const MosaicGallery = ({ project, onSelect }) => {
     const heroRow = Math.floor(heroIndex / columns);
     const heroColumn = heroIndex % columns;
     const hasHero = heroIndex !== null;
-    const columnWeights = Array.from({ length: columns }, (_, column) => hasHero && column === heroColumn ? 1.85 : 1);
-    const rowWeights = Array.from({ length: rows }, (_, row) => hasHero && row === heroRow ? 1.7 : 1);
+    // Let the active pane take over the wall rather than merely nudging its
+    // neighbours. The independent row/column expansion keeps the silhouette
+    // fluid while making the highlighted image the clear largest pane.
+    const columnWeights = Array.from({ length: columns }, (_, column) => hasHero && column === heroColumn ? 3.4 : 1);
+    const rowWeights = Array.from({ length: rows }, (_, row) => hasHero && row === heroRow ? 3 : 1);
     const columnTotal = columnWeights.reduce((sum, value) => sum + value, 0);
     const rowTotal = rowWeights.reduce((sum, value) => sum + value, 0);
     const xLines = columnWeights.reduce((lines, value) => [...lines, lines.at(-1) + width * value / columnTotal], [0]);
@@ -1200,7 +1203,7 @@ const MosaicGallery = ({ project, onSelect }) => {
               y={y}
               width={cellWidth}
               height={cellHeight}
-              preserveAspectRatio="xMidYMid slice"
+              preserveAspectRatio="xMidYMid meet"
               fetchPriority={index < columns ? 'high' : 'low'}
               clipPath={`url(#mosaic-${project.id}-${index})`}
               onLoad={() => setLoadedImages(previous => {
